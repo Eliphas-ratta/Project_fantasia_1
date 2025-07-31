@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark text-white">
+                <h2 class="card-header text-center">Edit Profile</h2>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+                        {{ form_row(form.username) }}
+                        {{ form_row(form.email) }}
+
+                        {% if user.profileImage %}
+                            <div class="mb-3 text-center">
+                                <strong>Current Avatar:</strong><br>
+                                <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Current Avatar" class="img-thumbnail" width="100">
+                            </div>
+                        {% endif %}
+
+                        {{ form_row(form.plainPassword) }}
+
+                        <label><strong>Select your avatar:</strong></label>
+                        <div class="d-flex flex-wrap gap-3 mb-4">
+                            {% for key, value in form.profileImage.vars.choices %}
+                                <label style="cursor:pointer;">
+                                    <input type="radio"
+                                           name="{{ form.profileImage.vars.full_name }}"
+                                           value="{{ value.value }}"
+                                           {% if value.value == form.profileImage.vars.data %}checked{% endif %}
+                                           style="display:none;">
+                                    <img src="{{ asset('uploads/profile_images/' ~ value.value) }}"
+                                         alt="{{ key }}"
+                                         class="img-thumbnail"
+                                         width="80"
+                                         style="border: 2px solid transparent;"
+                                         onclick="selectAvatar(this)">
+                                </label>
+                            {% endfor %}
+                        </div>
+
+                        {# CSRF token (obligatoire si render_rest à false) #}
+                        {{ form_row(form._token) }}
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary mt-4">Save</button>
+                        </div>
+
+                    {{ form_end(form, { 'render_rest': false }) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectAvatar(img) {
+        document.querySelectorAll('input[type="radio"][name="{{ form.profileImage.vars.full_name }}"]').forEach(el => {
+            el.checked = false;
+        });
+        const input = img.closest('label').querySelector('input');
+        input.checked = true;
+
+        document.querySelectorAll('.img-thumbnail').forEach(el => {
+            el.style.border = '2px solid transparent';
+        });
+        img.style.border = '2px solid rgb(255, 14, 14)';
+    }
+</script>
+{% endblock %}

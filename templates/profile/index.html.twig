@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="card bg-dark text-white">
+            <div class="card-header text-center">
+                <h2>{{ user.username }}'s Profile</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Email:</strong> {{ user.email }}</p>
+
+                <p><strong>Account created:</strong> {{ user.createAt ? user.createAt|date('Y-m-d H:i') : 'N/A' }}</p>
+
+                {% if user.profileImage %}
+                    <p><strong>Profile image:</strong></p>
+                    <img src="{{ asset('uploads/profile_images/' ~ user.profileImage) }}" alt="Profile Image" class="img-thumbnail" width="150">
+                {% endif %}
+
+                <div class="mt-4 text-center">
+                    <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">Edit Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

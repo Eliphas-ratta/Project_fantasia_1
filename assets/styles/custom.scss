@@ -1,0 +1,39 @@
+
+
+body {
+    background-color: rgb(37, 37, 37) !important;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    color: white !important;
+}
+
+p {
+    color: #ffffff !important;
+}
+
+label {
+    color: #ffffff !important;
+}
+
+.bg-dark {
+    background-color:rgb(15, 15, 15) !important;
+}
+
+.nav-link {
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    color: #0dcaf0 !important; 
+}
+
+.btn-primary {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.btn-danger {
+    background-color: #df2033 !important;
+    border-color: #df2033 !important;
+}

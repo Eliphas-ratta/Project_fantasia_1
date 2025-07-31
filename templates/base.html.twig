@@ -2,10 +2,16 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Project Fantasia - A fantasy world exploration platform">
+        <meta name="author" content="Project Fantasia Team">
+        <meta name="keywords" content="fantasy, worlds, exploration, community">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
+            {{ encore_entry_link_tags('custom') }}
         {% endblock %}
 
         {% block javascripts %}
@@ -14,6 +20,51 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-2">
+        <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+            
+            <!-- Left: Logo -->
+            <a class="navbar-brand text-white fw-bold" href="{{ path('app_home') }}">Project Fantasia</a>
+
+            <!-- Center: Navigation -->
+            <div class="d-flex gap-3">
+                <a class="nav-link text-white" href="{{ path('app_home') }}">Home</a>
+                <a class="nav-link text-white" href="#">Worlds</a>
+            </div>
+
+            <!-- Right: Auth Links -->
+        <div class="d-flex gap-3 align-items-center">
+        {% if app.user %}
+            {% if app.user.profileImage %}
+                <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"
+                    alt="Profile"
+                    width="36"
+                    height="36"
+                    class="rounded-circle border border-light"
+                    style="object-fit: cover;">
+            {% endif %}
+            <a class="nav-link text-white" href="{{ path('app_profile') }}">Profile</a>
+            <a class="nav-link text-danger" href="{{ path('app_logout') }}">Log out</a>
+        {% else %}
+            <a class="nav-link text-white" href="{{ path('app_login') }}">Login</a>
+            <a class="nav-link text-white" href="{{ path('app_register') }}">Register</a>
+        {% endif %}
+</div>
+
+    </header>
+
+       {% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
+
+
+
+        <main class="container mt-4">
+            {% block body %}{% endblock %}
+        </main>
     </body>
 </html>
