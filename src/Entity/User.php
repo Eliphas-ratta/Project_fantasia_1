@@ -5,12 +5,14 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -29,8 +31,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column]
-    private ?\DateTime $createAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $profileImage = null;
@@ -40,6 +42,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailVerificationToken = null;
+
+    // ✅ Réinitialisation de mot de passe
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetTokenExpiresAt = null;
 
     #[ORM\OneToMany(targetEntity: World::class, mappedBy: 'createdBy')]
     private Collection $worlds;
@@ -51,6 +60,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->worlds = new ArrayCollection();
         $this->worldUserRoles = new ArrayCollection();
+    }
+
+    #[ORM\PrePersist]
+    public function setCreateAtValue(): void
+    {
+        if ($this->createAt === null) {
+            $this->createAt = new \DateTime(); // ou new \DateTimeImmutable() si tu passes le champ en IMMUTABLE
+        }
     }
 
     public function getId(): ?int
@@ -91,12 +108,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCreateAt(): ?\DateTime
+    public function getCreateAt(): ?\DateTimeInterface
     {
         return $this->createAt;
     }
 
-    public function setCreateAt(\DateTime $createAt): static
+    public function setCreateAt(\DateTimeInterface $createAt): static
     {
         $this->createAt = $createAt;
         return $this;
@@ -135,6 +152,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // ✅ Reset password
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
+
+    public function getResetTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiresAt;
+    }
+
+    public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): static
+    {
+        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+        return $this;
+    }
+
+    // --- Security ---
     public function getUserIdentifier(): string
     {
         return $this->username ?? '';
@@ -147,14 +188,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Ex: vider le plainPassword temporaire
+        // vider des données sensibles temporaires si besoin
     }
 
     public function getSalt(): ?string
     {
-        return null; // inutile avec modern hashers
+        return null;
     }
 
+    // --- Relations ---
     public function getWorlds(): Collection
     {
         return $this->worlds;

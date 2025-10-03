@@ -46,21 +46,53 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // Envoie un e-mail de vérification
-            $verificationUrl = $this->generateUrl('app_verify_email', ['token' => $token], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+                        // Send verification email
+            $verificationUrl = $this->generateUrl(
+                'app_verify_email',
+                ['token' => $token],
+                \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL
+            );
 
             $email = (new Email())
                 ->from('projetfantasia@gmail.com')
                 ->to($user->getEmail())
-                ->subject('Please verify your email')
-                ->html("
-                    <p>Welcome to <strong>Project Fantasia</strong>, {$user->getUsername()}!</p>
-                    <p>Click the link below to verify your account:</p>
-                    <p><a href=\"$verificationUrl\">Verify my email</a></p>
-                    <p>If you did not create this account, you can safely ignore this message.</p>
-                ");
+                ->subject('Verify your email - Project Fantasia')
+                ->html(<<<HTML
+                    <div style="font-family: Arial, sans-serif; background-color:#f8f9fa; padding:20px;">
+                        <div style="max-width:600px; margin:0 auto; background:#ffffff; border-radius:8px; 
+                                    box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:20px;">
+                            
+                            <h2 style="color:#d9534f; text-align:center;">✨ Welcome to Project Fantasia!</h2>
+                            
+                            <p>Hello <strong>{$user->getUsername()}</strong>,</p>
+                            
+                            <p>Thank you for signing up to <strong>Project Fantasia</strong> 🎉</p>
+                            <p>To activate your account and access all features, please confirm your email address:</p>
+                            
+                            <div style="text-align:center; margin:30px 0;">
+                                <a href="{$verificationUrl}" 
+                                style="background:#d9534f; color:#fff; padding:12px 20px; text-decoration:none; 
+                                        border-radius:6px; font-weight:bold; display:inline-block;">
+                                    ✅ Verify my email
+                                </a>
+                            </div>
+                            
+                            <p style="font-size:14px; color:#555;">
+                                If you did not create this account, you can safely ignore this email.
+                            </p>
+                            
+                            <hr style="margin:20px 0; border:none; border-top:1px solid #eee;">
+                            
+                            <p style="font-size:12px; color:#999; text-align:center;">
+                                © Project Fantasia — Please do not reply to this automated email.
+                            </p>
+                        </div>
+                    </div>
+                HTML);
 
             $mailer->send($email);
+
+
 
             $this->addFlash('success', 'Registration successful! Please check your email to verify your account.');
             return $this->redirectToRoute('app_login');
