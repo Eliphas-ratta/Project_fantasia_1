@@ -1,70 +1,256 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="Project Fantasia - A fantasy world exploration platform">
-        <meta name="author" content="Project Fantasia Team">
-        <meta name="keywords" content="fantasy, worlds, exploration, community">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Welcome!{% endblock %}</title>
 
-        {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
-            {{ encore_entry_link_tags('custom') }}
-        {% endblock %}
+  {% block stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+    {{ encore_entry_link_tags('custom') }}
+    <style>
+      html, body { overflow-x: hidden; }
+      .friends-row { position: relative; }
 
-        {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
-        <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-2">
-        <div class="container-fluid d-flex justify-content-between align-items-center w-100">
-            
-            <!-- Left: Logo -->
-            <a class="navbar-brand text-white fw-bold" href="{{ path('app_home') }}">Project Fantasia</a>
+      #friendsSidebar{
+        flex: 0 0 300px;
+        max-width: 300px;
+        background:#1a1a1a;
+        color:#fff;
+        min-height:100vh;
+        padding:1rem;
+        position: relative;
+        z-index: 10;
+        border-radius:12px 0 0 12px;
+        transition:flex-basis .3s ease, max-width .3s ease, padding .3s ease;
+        overflow: visible;
+      }
+      #friendsSidebar.collapsed{
+        flex:0 0 60px;
+        max-width:60px;
+        padding:.5rem .25rem;
+      }
 
-            <!-- Center: Navigation -->
-            <div class="d-flex gap-3">
-                <a class="nav-link text-white" href="{{ path('app_home') }}">Home</a>
-                <a class="nav-link text-white" href="#">Worlds</a>
-            </div>
+      #friendsBox{
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        overflow-x: hidden;
+        transition: opacity .3s ease;
+      }
+      #friendsSidebar.collapsed #friendsBox{ display:none; opacity:0; }
 
-            <!-- Right: Auth Links -->
-        <div class="d-flex gap-3 align-items-center">
+      #appMain{ position: relative; z-index: 1; }
+
+      #toggleSidebar{
+        position:absolute;
+        top:50%;
+        right:-18px;
+        transform: translateY(-50%);
+        width:36px; height:36px;
+        border-radius:50%;
+        background:#1a1a1a;
+        border:2px solid #fff;
+        color:#fff;
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer;
+        z-index:9999;
+        transition: background .3s ease, transform .3s ease;
+      }
+      #toggleSidebar:hover{ background:#333; }
+      #friendsSidebar.collapsed #toggleSidebar{
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      .friends-search{
+        display:flex; gap:.5rem; margin-bottom:1rem; width:100%;
+      }
+      .friends-search input{
+        flex:1; min-width:0;
+        border:none; border-radius:8px;
+        padding:.35rem .55rem;
+        font-size:.9rem;
+        background:#333; color:#fff;
+      }
+      .friends-search input::placeholder{ color:#aaa; }
+      .friends-search button{
+        border:none; border-radius:8px;
+        padding:.35rem .6rem;
+        font-size:.85rem; line-height:1;
+        background:#28a745; color:#fff; font-weight:700;
+        white-space: nowrap;
+      }
+
+      .section-label{
+        display:inline-block; background:#333; color:#fff;
+        padding:.18rem .5rem; border-radius:8px; font-size:.8rem; margin:.5rem 0;
+      }
+
+      .friend-item{
+        display:flex; align-items:center; justify-content:space-between;
+        background:#2a2a2a; padding:.5rem .65rem; border-radius:12px; margin-bottom:.6rem;
+      }
+      .friend-info{ display:flex; align-items:center; gap:.6rem; }
+      .friend-avatar{
+        width:32px; height:32px; border-radius:50%; background:#666; 
+        object-fit: cover;
+      }
+      .friend-name{ color:#fff; font-size:.95rem; }
+      .friend-actions a{
+        border:none; border-radius:50%; width:28px; height:28px;
+        margin-left:.4rem; font-size:14px; color:#fff;
+        display:flex; align-items:center; justify-content:center;
+        text-decoration:none;
+      }
+      .btn-accept{ background:#28a745; }
+      .btn-decline{ background:#dc3545; }
+    </style>
+  {% endblock %}
+
+  {% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('friendsSidebar');
+        if (btn && sidebar) {
+          btn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+        }
+      });
+    </script>
+  {% endblock %}
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-2">
+    <div class="container-fluid d-flex justify-content-between align-items-center w-100">
+      <a class="navbar-brand text-white fw-bold" href="{{ path('app_home') }}">Project Fantasia</a>
+      <div class="d-flex gap-3">
+        <a class="nav-link text-white" href="{{ path('app_home') }}">Home</a>
+        <a class="nav-link text-white" href="#">Worlds</a>
+        <a class="nav-link text-white" href="{{ path('app_friends') }}">Friends</a>
+      </div>
+      <div class="d-flex gap-3 align-items-center">
         {% if app.user %}
-            {% if app.user.profileImage %}
-                <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"
-                    alt="Profile"
-                    width="36"
-                    height="36"
-                    class="rounded-circle border border-light"
-                    style="object-fit: cover;">
-            {% endif %}
-            <a class="nav-link text-white" href="{{ path('app_profile') }}">Profile</a>
-            <a class="nav-link text-danger" href="{{ path('app_logout') }}">Log out</a>
+          {% if app.user.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"
+                 alt="Profile"
+                 width="36"
+                 height="36"
+                 class="rounded-circle border border-light"
+                 style="object-fit: cover;">
+          {% endif %}
+          <a class="nav-link text-white" href="{{ path('app_profile') }}">Profile</a>
+          <a class="nav-link text-danger" href="{{ path('app_logout') }}">Log out</a>
         {% else %}
-            <a class="nav-link text-white" href="{{ path('app_login') }}">Login</a>
-            <a class="nav-link text-white" href="{{ path('app_register') }}">Register</a>
+          <a class="nav-link text-white" href="{{ path('app_login') }}">Login</a>
+          <a class="nav-link text-white" href="{{ path('app_register') }}">Register</a>
         {% endif %}
-</div>
+      </div>
+    </div>
+  </header>
 
-    </header>
+  <!-- ✅ Flash messages -->
+  <div class="container mt-2">
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
 
-       {% for message in app.flashes('success') %}
-    <div class="alert alert-success">{{ message }}</div>
-{% endfor %}
+  <div class="container-fluid">
+    <div class="row friends-row">
+      {% if app.user and app.request.attributes.get('_route') == 'app_home' %}
+        <aside id="friendsSidebar">
+          <button id="toggleSidebar" aria-label="Toggle friends panel">❮</button>
 
-{% for message in app.flashes('error') %}
-    <div class="alert alert-danger">{{ message }}</div>
-{% endfor %}
+          <div id="friendsBox">
+            <h5 class="text-center mb-3">Friends</h5>
 
+            <!-- Search + Add Friend -->
+            <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search">
+              <input type="text" name="username" placeholder="Enter username" required>
+              <button type="submit">Add</button>
+            </form>
 
+            <!-- Pending Requests (Received) -->
+            <span class="section-label">Friend requests received</span>
+            {% for f in get_pending_received() %}
+              <div class="friend-item">
+                <div class="friend-info">
+                  {% if f.user.profileImage %}
+                    <img src="{{ asset('uploads/profile_images/' ~ f.user.profileImage) }}"
+                         alt="{{ f.user.username }}"
+                         class="friend-avatar">
+                  {% else %}
+                    <div class="friend-avatar"></div>
+                  {% endif %}
+                  <span class="friend-name">{{ f.user.username }}</span>
+                </div>
+                <div class="friend-actions d-flex">
+                  <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept">✔</a>
+                  <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline">✖</a>
+                </div>
+              </div>
+            {% else %}
+              <p>No pending requests</p>
+            {% endfor %}
 
-        <main class="container mt-4">
-            {% block body %}{% endblock %}
-        </main>
-    </body>
+            <!-- Pending Requests (Sent) -->
+            <span class="section-label">Friend requests sent</span>
+            {% for f in get_pending_sent() %}
+              <div class="friend-item">
+                <div class="friend-info">
+                  {% if f.friend.profileImage %}
+                    <img src="{{ asset('uploads/profile_images/' ~ f.friend.profileImage) }}"
+                         alt="{{ f.friend.username }}"
+                         class="friend-avatar">
+                  {% else %}
+                    <div class="friend-avatar"></div>
+                  {% endif %}
+                  <span class="friend-name">{{ f.friend.username }}</span>
+                </div>
+                <div class="friend-actions">
+                  <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline">✖</a>
+                </div>
+              </div>
+            {% else %}
+              <p>No sent requests</p>
+            {% endfor %}
+
+            <!-- Your Friends -->
+            <span class="section-label">Your friends</span>
+            {% for f in get_friends() %}
+              {% set friendUser = f.user.id == app.user.id ? f.friend : f.user %}
+              <div class="friend-item">
+                <div class="friend-info">
+                  {% if friendUser.profileImage %}
+                    <img src="{{ asset('uploads/profile_images/' ~ friendUser.profileImage) }}"
+                         alt="{{ friendUser.username }}"
+                         class="friend-avatar">
+                  {% else %}
+                    <div class="friend-avatar"></div>
+                  {% endif %}
+                  <span class="friend-name">{{ friendUser.username }}</span>
+                </div>
+                <div class="friend-actions">
+                  <a href="{{ path('app_friend_remove', {id: f.id}) }}" class="btn-decline">✖</a>
+                </div>
+              </div>
+            {% else %}
+              <p>No friends yet</p>
+            {% endfor %}
+          </div>
+        </aside>
+      {% endif %}
+
+      <main id="appMain" class="col p-4">
+        {% block body %}{% endblock %}
+      </main>
+    </div>
+  </div>
+</body>
 </html>

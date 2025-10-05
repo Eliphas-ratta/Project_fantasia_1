@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Friends{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-center align-items-start" style="min-height: 80vh; padding-top: 2rem;">
+  <div class="friends-card bg-dark text-white p-4 rounded shadow" style="width: 500px;">
+    <h4 class="mb-3"> Friends</h4>
+
+    <!-- Search + Add Friend -->
+   <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search">
+  <input type="hidden" name="_token" value="{{ csrf_token('add_friend') }}">
+  <input type="text" name="username" placeholder="Enter username" required>
+  <button type="submit">Add</button>
+</form>
+
+
+    <!-- Accepted Friends -->
+    <span class="section-label">✅ Accepted</span>
+    {% for f in friends %}
+      {% set friendUser = f.user.id == app.user.id ? f.friend : f.user %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if friendUser.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ friendUser.profileImage) }}"
+                 alt="{{ friendUser.username }}"
+                 class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ friendUser.username }}</span>
+        </div>
+        <div class="friend-actions">
+          <a href="{{ path('app_friend_remove', {id: f.id}) }}" class="btn-decline">✖</a>
+        </div>
+      </div>
+    {% else %}
+      <p class="">No friends yet</p>
+    {% endfor %}
+
+    <!-- Requests Received -->
+    <span class="section-label">📥 Requests Received</span>
+    {% for f in pendingReceived %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if f.user.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ f.user.profileImage) }}"
+                 alt="{{ f.user.username }}"
+                 class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ f.user.username }}</span>
+        </div>
+        <div class="friend-actions d-flex align-items-center">
+          <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept">✔</a>
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline">✖</a>
+        </div>
+      </div>
+    {% else %}
+      <p class="">No pending requests</p>
+    {% endfor %}
+
+    <!-- Requests Sent -->
+    <span class="section-label">📤 Requests Sent</span>
+    {% for f in pendingSent %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if f.friend.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ f.friend.profileImage) }}"
+                 alt="{{ f.friend.username }}"
+                 class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ f.friend.username }}</span>
+        </div>
+        <div class="friend-actions d-flex align-items-center">
+          <span class="badge bg-warning text-dark">⏳</span>
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline" title="Cancel request">✖</a>
+        </div>
+      </div>
+    {% else %}
+      <p class="">No sent requests</p>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .section-label {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: .2rem .6rem;
+    border-radius: 8px;
+    font-size: .85rem;
+    margin: .5rem 0;
+  }
+
+  .friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #2a2a2a;
+    padding: .5rem .65rem;
+    border-radius: 12px;
+    margin-bottom: .6rem;
+  }
+
+  .friend-info {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  .friend-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #666;
+    object-fit: cover;
+  }
+
+  .friend-name {
+    color: #fff;
+    font-size: .95rem;
+  }
+
+  .friend-actions a {
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    margin-left: .4rem;
+    font-size: 14px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .btn-accept { background: #28a745; }
+  .btn-decline { background: #dc3545; }
+    .friends-search {
+        color: #2a2a2a;
+
+     }
+
+  .friends-search input::placeholder {
+    color: #fff;
+    
+  }
+</style>
+{% endblock %}

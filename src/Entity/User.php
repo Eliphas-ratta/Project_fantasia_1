@@ -43,32 +43,44 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailVerificationToken = null;
 
-    // ✅ Réinitialisation de mot de passe
+    // ✅ Password reset
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $resetToken = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $resetTokenExpiresAt = null;
 
+    // ✅ Relations
     #[ORM\OneToMany(targetEntity: World::class, mappedBy: 'createdBy')]
     private Collection $worlds;
 
     #[ORM\OneToMany(targetEntity: WorldUserRole::class, mappedBy: 'user')]
     private Collection $worldUserRoles;
 
+    // ✅ Friendships
+    #[ORM\OneToMany(targetEntity: Friendship::class, mappedBy: 'user')]
+    private Collection $sentFriendRequests; // demandes envoyées
+
+    #[ORM\OneToMany(targetEntity: Friendship::class, mappedBy: 'friend')]
+    private Collection $receivedFriendRequests; // demandes reçues
+
     public function __construct()
     {
         $this->worlds = new ArrayCollection();
         $this->worldUserRoles = new ArrayCollection();
+        $this->sentFriendRequests = new ArrayCollection();
+        $this->receivedFriendRequests = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
     public function setCreateAtValue(): void
     {
         if ($this->createAt === null) {
-            $this->createAt = new \DateTime(); // ou new \DateTimeImmutable() si tu passes le champ en IMMUTABLE
+            $this->createAt = new \DateTime();
         }
     }
+
+    // --- Getters / Setters de base ---
 
     public function getId(): ?int
     {
@@ -188,7 +200,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // vider des données sensibles temporaires si besoin
+        // Clear temporary sensitive data if needed
     }
 
     public function getSalt(): ?string
@@ -208,7 +220,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this->worlds->add($world);
             $world->setCreatedBy($this);
         }
-
         return $this;
     }
 
@@ -219,7 +230,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $world->setCreatedBy(null);
             }
         }
-
         return $this;
     }
 
@@ -234,7 +244,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this->worldUserRoles->add($worldUserRole);
             $worldUserRole->setUser($this);
         }
-
         return $this;
     }
 
@@ -245,7 +254,61 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $worldUserRole->setUser(null);
             }
         }
+        return $this;
+    }
 
+    // --- Friendships ---
+    /**
+     * @return Collection<int, Friendship>
+     */
+    public function getSentFriendRequests(): Collection
+    {
+        return $this->sentFriendRequests;
+    }
+
+    public function addSentFriendRequest(Friendship $friendship): static
+    {
+        if (!$this->sentFriendRequests->contains($friendship)) {
+            $this->sentFriendRequests->add($friendship);
+            $friendship->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeSentFriendRequest(Friendship $friendship): static
+    {
+        if ($this->sentFriendRequests->removeElement($friendship)) {
+            if ($friendship->getUser() === $this) {
+                $friendship->setUser(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Friendship>
+     */
+    public function getReceivedFriendRequests(): Collection
+    {
+        return $this->receivedFriendRequests;
+    }
+
+    public function addReceivedFriendRequest(Friendship $friendship): static
+    {
+        if (!$this->receivedFriendRequests->contains($friendship)) {
+            $this->receivedFriendRequests->add($friendship);
+            $friendship->setFriend($this);
+        }
+        return $this;
+    }
+
+    public function removeReceivedFriendRequest(Friendship $friendship): static
+    {
+        if ($this->receivedFriendRequests->removeElement($friendship)) {
+            if ($friendship->getFriend() === $this) {
+                $friendship->setFriend(null);
+            }
+        }
         return $this;
     }
 }
