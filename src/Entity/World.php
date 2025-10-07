@@ -23,7 +23,7 @@ class World
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $visibility = null;
+    private ?string $visibility = 'private';
 
     #[ORM\Column]
     private ?\DateTime $createAt = null;
@@ -100,6 +100,7 @@ class World
         $this->races = new ArrayCollection();
         $this->religions = new ArrayCollection();
         $this->technologies = new ArrayCollection();
+        $this->createAt = new \DateTime(); 
     }
 
     public function getId(): ?int

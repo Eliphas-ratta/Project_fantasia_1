@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+{% block title %}Create a World{% endblock %}
+
+{% block body %}
+<div class="world-wrapper d-flex justify-content-center align-items-center py-5">
+    <div class="world-create-card text-light shadow-lg">
+        <h1 class="text-center mb-4 fw-bold title-green">
+            🌍 Create a new World
+        </h1>
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            <div class="form-section">
+                <div class="form-group mb-4">
+                    {{ form_label(form.name, 'Name', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'input-field', 'placeholder': 'Enter a world name'}}) }}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'textarea-field', 'rows': 5, 'placeholder': 'Describe your world'}}) }}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.image, 'Image', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="image-upload d-flex align-items-center gap-2">
+                        {{ form_widget(form.image, {'attr': {'class': 'input-field'}}) }}
+                        
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mt-4 mb-3 fw-semibold">Add Friends</h4>
+
+            <div class="friends-list">
+                {% for friend in friends %}
+                    <div class="friend-row d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <img 
+                                src="{{ asset(friend.profileImage ? 'uploads/profile_images/' ~ friend.profileImage : 'uploads/profile_images/default.png') }}"
+                                class="friend-avatar"
+                                alt="{{ friend.username }}">
+                            <span class="friend-name">{{ friend.username }}</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <input type="checkbox" name="friends[{{ friend.id }}][selected]" value="1" class="checkbox-green">
+                            <div class="role-select d-flex align-items-center gap-1">
+                                <label>Role:</label>
+                                <select name="friends[{{ friend.id }}][role]" class="role-dropdown">
+                                    <option value="VIEWER" selected>Observer</option>
+                                    <option value="MODERATOR">Moderator</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted mt-3">You have no friends to add yet 😅</p>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-5">
+                <button type="submit" class="btn-green glow">+ Create a new World</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

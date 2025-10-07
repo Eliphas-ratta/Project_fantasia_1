@@ -9,6 +9,8 @@
     {{ encore_entry_link_tags('app') }}
     {{ encore_entry_link_tags('custom') }}
     {{ encore_entry_link_tags('sidebarcss') }}
+    {{ encore_entry_link_tags('world') }}
+
   {% endblock %}
 </head>
 
@@ -19,7 +21,7 @@
       <a class="navbar-brand text-white fw-bold" href="{{ path('app_home') }}">Project Fantasia</a>
       <div class="d-flex gap-3">
         <a class="nav-link text-white" href="{{ path('app_home') }}">Home</a>
-        <a class="nav-link text-white" href="#">Worlds</a>
+        <a class="nav-link text-white" href="{{ path('app_world_index') }}">Worlds</a>
         <a class="nav-link text-white" href="{{ path('app_friends') }}">Friends</a>
       </div>
       <div class="d-flex gap-3 align-items-center">
