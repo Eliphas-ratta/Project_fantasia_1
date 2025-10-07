@@ -1,0 +1,80 @@
+<div id="friendsBox">
+  <h5 class="text-center mb-3">Friends</h5>
+
+  <!-- Add Friend -->
+  <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search" id="add-friend-form">
+    <input type="text" name="username" placeholder="Enter username" required>
+    <button type="submit">Add</button>
+  </form>
+
+  <!-- Friend Requests Received -->
+  <span class="section-label">Friend requests received</span>
+  {% if pendingReceived is not empty %}
+    {% for f in pendingReceived %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if f.user.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ f.user.profileImage) }}" 
+                 alt="{{ f.user.username }}" class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ f.user.username }}</span>
+        </div>
+        <div class="friend-actions d-flex">
+          <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept ajax-action">✔</a>
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">✖</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No pending requests</p>
+  {% endif %}
+
+  <!-- Friend Requests Sent -->
+  <span class="section-label">Friend requests sent</span>
+  {% if pendingSent is not empty %}
+    {% for f in pendingSent %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if f.friend.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ f.friend.profileImage) }}" 
+                 alt="{{ f.friend.username }}" class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ f.friend.username }}</span>
+        </div>
+        <div class="friend-actions">
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">✖</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No sent requests</p>
+  {% endif %}
+
+  <!-- Your Friends -->
+  <span class="section-label">Your friends</span>
+  {% if friends is not empty %}
+    {% for f in friends %}
+      {% set friendUser = f.user.id == app.user.id ? f.friend : f.user %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if friendUser.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ friendUser.profileImage) }}" 
+                 alt="{{ friendUser.username }}" class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ friendUser.username }}</span>
+        </div>
+        <div class="friend-actions">
+          <a href="{{ path('app_friend_remove', {id: f.id}) }}" class="btn-decline ajax-action">✖</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No friends yet</p>
+  {% endif %}
+</div>

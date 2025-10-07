@@ -41,42 +41,27 @@ class FriendshipController extends AbstractController
         FriendshipRepository $friendshipRepository
     ): Response {
         $user = $this->getUser();
-
-        // ✅ Vérification CSRF
-        if (!$this->isCsrfTokenValid('add_friend', $request->request->get('_token'))) {
-            $this->addFlash('danger', 'Invalid CSRF token.');
-            return $this->redirectToRoute('app_friends');
-        }
-
-        $username = $request->request->get('username');
+        $username = trim($request->request->get('username', ''));
 
         if (!$username) {
-            $this->addFlash('danger', 'Please enter a username.');
-            return $this->redirectToRoute('app_friends');
+            return $this->handleResponse($request, 'danger', 'Please enter a username.', 400);
         }
 
         $friend = $userRepository->findOneBy(['username' => $username]);
-
         if (!$friend) {
-            $this->addFlash('danger', 'User not found.');
-            return $this->redirectToRoute('app_friends');
+            return $this->handleResponse($request, 'danger', 'User not found.', 404);
         }
 
         if ($friend === $user) {
-            $this->addFlash('warning', 'You cannot add yourself.');
-            return $this->redirectToRoute('app_friends');
+            return $this->handleResponse($request, 'warning', 'You cannot add yourself.');
         }
 
-        // ✅ Vérifie relation avec le repo custom
         $existing = $friendshipRepository->findExistingRelation($user, $friend);
-
         if ($existing) {
-            if ($existing->getStatus() === 'accepted') {
-                $this->addFlash('info', 'You are already friends with this user.');
-            } elseif ($existing->getStatus() === 'pending') {
-                $this->addFlash('warning', 'A friend request already exists.');
-            }
-            return $this->redirectToRoute('app_friends');
+            $message = $existing->getStatus() === 'accepted'
+                ? 'You are already friends with this user.'
+                : 'A friend request already exists.';
+            return $this->handleResponse($request, 'warning', $message);
         }
 
         $friendship = new Friendship();
@@ -87,58 +72,88 @@ class FriendshipController extends AbstractController
         $em->persist($friendship);
         $em->flush();
 
-        $this->addFlash('success', 'Friend request sent!');
-        return $this->redirectToRoute('app_friends');
+        return $this->handleResponse($request, 'success', 'Friend request sent!');
     }
 
-    #[Route('/accept/{id}', name: 'app_friend_accept')]
-    public function accept(Friendship $friendship, EntityManagerInterface $em): Response
+    #[Route('/accept/{id}', name: 'app_friend_accept', methods: ['GET', 'POST'])]
+    public function accept(Friendship $friendship, EntityManagerInterface $em, Request $request): Response
     {
         $user = $this->getUser();
 
         if ($friendship->getFriend() !== $user) {
-            $this->addFlash('danger', 'You cannot accept this request.');
-            return $this->redirectToRoute('app_friends');
+            return $this->handleResponse($request, 'danger', 'You cannot accept this request.', 403);
         }
 
         $friendship->setStatus('accepted');
         $em->flush();
 
-        $this->addFlash('success', 'Friend request accepted!');
-        return $this->redirectToRoute('app_friends');
+        return $this->handleResponse($request, 'success', 'Friend request accepted!');
     }
 
-    #[Route('/decline/{id}', name: 'app_friend_decline')]
-    public function decline(Friendship $friendship, EntityManagerInterface $em): Response
+    #[Route('/decline/{id}', name: 'app_friend_decline', methods: ['GET', 'POST'])]
+    public function decline(Friendship $friendship, EntityManagerInterface $em, Request $request): Response
     {
         $user = $this->getUser();
 
-        if ($friendship->getFriend() !== $user) {
-            $this->addFlash('danger', 'You cannot decline this request.');
-            return $this->redirectToRoute('app_friends');
+        if ($friendship->getFriend() !== $user && $friendship->getUser() !== $user) {
+            return $this->handleResponse($request, 'danger', 'You cannot decline this request.', 403);
         }
 
         $em->remove($friendship);
         $em->flush();
 
-        $this->addFlash('info', 'Friend request declined.');
-        return $this->redirectToRoute('app_friends');
+        return $this->handleResponse($request, 'info', 'Friend request declined.');
     }
 
-    #[Route('/remove/{id}', name: 'app_friend_remove')]
-    public function remove(Friendship $friendship, EntityManagerInterface $em): Response
+    #[Route('/remove/{id}', name: 'app_friend_remove', methods: ['GET', 'POST'])]
+    public function remove(Friendship $friendship, EntityManagerInterface $em, Request $request): Response
     {
         $user = $this->getUser();
 
         if ($friendship->getUser() !== $user && $friendship->getFriend() !== $user) {
-            $this->addFlash('danger', 'You cannot remove this friendship.');
-            return $this->redirectToRoute('app_friends');
+            return $this->handleResponse($request, 'danger', 'You cannot remove this friendship.', 403);
         }
 
         $em->remove($friendship);
         $em->flush();
 
-        $this->addFlash('info', 'Friend removed.');
+        return $this->handleResponse($request, 'info', 'Friend removed.');
+    }
+
+    /**
+     * ✅ Méthode utilitaire pour renvoyer une réponse JSON ou Flash + redirection.
+     */
+    private function handleResponse(Request $request, string $status, string $message, int $code = 200): Response
+    {
+        if ($request->isXmlHttpRequest()) {
+            return $this->json(['status' => $status, 'message' => $message], $code);
+        }
+
+        $this->addFlash($status, $message);
         return $this->redirectToRoute('app_friends');
+    }
+
+    /**
+     * ✅ Nouveau endpoint pour recharger uniquement la sidebar AJAX.
+     */
+    #[Route('/sidebar', name: 'app_friend_sidebar', methods: ['GET'])]
+    public function sidebar(FriendshipRepository $friendshipRepository): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            // pas connecté = pas de sidebar
+            return new Response('', 204);
+        }
+
+        $friends = $friendshipRepository->findFriends($user);
+        $pendingReceived = $friendshipRepository->findPendingRequestsReceived($user);
+        $pendingSent = $friendshipRepository->findPendingRequestsSent($user);
+
+        return $this->render('friendship/_sidebar.html.twig', [
+            'friends' => $friends,
+            'pendingReceived' => $pendingReceived,
+            'pendingSent' => $pendingSent,
+        ]);
     }
 }

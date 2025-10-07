@@ -22,6 +22,9 @@ Encore
      */
     .addEntry('app', './assets/app.js')
     .addStyleEntry('custom', './assets/styles/custom.scss')
+    .addEntry('sidebarjs', './assets/scripts/sidebar.js')
+    .addStyleEntry('sidebarcss', './assets/styles/sidebar.scss')
+
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
