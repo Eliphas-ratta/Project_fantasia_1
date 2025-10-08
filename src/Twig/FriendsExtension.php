@@ -3,7 +3,7 @@
 namespace App\Twig;
 
 use App\Repository\FriendshipRepository;
-use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Security\Core\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -33,7 +33,8 @@ class FriendsExtension extends AbstractExtension
         if (!$user) {
             return [];
         }
-        return $this->friendshipRepository->findFriends($user);
+
+        return $this->friendshipRepository->findFriendsOfUser($user);
     }
 
     public function getPendingReceived(): array
@@ -42,7 +43,8 @@ class FriendsExtension extends AbstractExtension
         if (!$user) {
             return [];
         }
-        return $this->friendshipRepository->findPendingRequestsReceived($user);
+
+        return $this->friendshipRepository->findPendingReceivedByUser($user);
     }
 
     public function getPendingSent(): array
@@ -51,6 +53,7 @@ class FriendsExtension extends AbstractExtension
         if (!$user) {
             return [];
         }
-        return $this->friendshipRepository->findPendingRequestsSent($user);
+
+        return $this->friendshipRepository->findPendingSentByUser($user);
     }
 }

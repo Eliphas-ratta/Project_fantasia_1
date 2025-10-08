@@ -7,6 +7,9 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<Friendship>
+ */
 class FriendshipRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,11 +19,8 @@ class FriendshipRepository extends ServiceEntityRepository
 
     /**
      * Retourne la liste des amis confirmés (status = 'accepted') d’un utilisateur.
-     *
-     * @param User $user
-     * @return User[]
      */
-    public function getFriends(User $user): array
+    public function findFriendsOfUser(User $user): array
     {
         $qb = $this->createQueryBuilder('f')
             ->where('(f.user = :user OR f.friend = :user)')
@@ -32,16 +32,56 @@ class FriendshipRepository extends ServiceEntityRepository
 
         $friends = [];
         foreach ($friendships as $friendship) {
-            // Si l’utilisateur est le demandeur, on retourne le destinataire
             if ($friendship->getUser() === $user) {
                 $friends[] = $friendship->getFriend();
-            }
-            // Sinon, on retourne l’expéditeur
-            else {
+            } else {
                 $friends[] = $friendship->getUser();
             }
         }
 
         return $friends;
+    }
+
+    /**
+     * Retourne les demandes d’amis reçues non encore acceptées (status = 'pending').
+     */
+    public function findPendingReceivedByUser(User $user): array
+    {
+        return $this->createQueryBuilder('f')
+            ->where('f.friend = :user')
+            ->andWhere('f.status = :pending')
+            ->setParameter('user', $user)
+            ->setParameter('pending', 'pending')
+            ->orderBy('f.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Retourne les demandes d’amis envoyées non encore acceptées (status = 'pending').
+     */
+    public function findPendingSentByUser(User $user): array
+    {
+        return $this->createQueryBuilder('f')
+            ->where('f.user = :user')
+            ->andWhere('f.status = :pending')
+            ->setParameter('user', $user)
+            ->setParameter('pending', 'pending')
+            ->orderBy('f.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Vérifie si une relation d’amitié (dans un sens ou l’autre) existe déjà entre deux utilisateurs.
+     */
+    public function findExistingRelation(User $user1, User $user2): ?Friendship
+    {
+        return $this->createQueryBuilder('f')
+            ->where('(f.user = :u1 AND f.friend = :u2) OR (f.user = :u2 AND f.friend = :u1)')
+            ->setParameter('u1', $user1)
+            ->setParameter('u2', $user2)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

@@ -36,8 +36,8 @@ class WorldController extends AbstractController
     ): Response {
         $user = $this->getUser();
 
-        // Récupère la liste d’amis du joueur connecté
-        $friends = $friendRepo->getFriends($user);
+        // ✅ Récupère la liste d’amis du joueur connecté
+        $friends = $friendRepo->findFriendsOfUser($user);
 
         $world = new World();
         $form = $this->createForm(WorldType::class, $world);
@@ -100,14 +100,10 @@ class WorldController extends AbstractController
     }
 
     #[Route('/world/{id}', name: 'app_world_show')]
-public function show(World $world): Response
-{
-    return $this->render('world/show.html.twig', [
-        'world' => $world,
-    ]);
-}
-
-
-
-
+    public function show(World $world): Response
+    {
+        return $this->render('world/show.html.twig', [
+            'world' => $world,
+        ]);
+    }
 }

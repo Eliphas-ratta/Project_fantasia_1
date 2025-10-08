@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\Security;
 
 #[Route('/friend')]
 #[IsGranted('ROLE_USER')]
@@ -22,9 +23,9 @@ class FriendshipController extends AbstractController
     {
         $user = $this->getUser();
 
-        $friends = $friendshipRepository->findFriends($user);
-        $pendingReceived = $friendshipRepository->findPendingRequestsReceived($user);
-        $pendingSent = $friendshipRepository->findPendingRequestsSent($user);
+        $friends = $friendshipRepository->findFriendsOfUser($user);
+        $pendingReceived = $friendshipRepository->findPendingReceivedByUser($user);
+        $pendingSent = $friendshipRepository->findPendingSentByUser($user);
 
         return $this->render('friendship/index.html.twig', [
             'friends' => $friends,
@@ -106,12 +107,25 @@ class FriendshipController extends AbstractController
     }
 
     #[Route('/remove/{id}', name: 'app_friend_remove', methods: ['GET', 'POST'])]
-    public function remove(Friendship $friendship, EntityManagerInterface $em, Request $request): Response
-    {
-        $user = $this->getUser();
+    public function remove(
+        User $user,
+        FriendshipRepository $friendshipRepository,
+        EntityManagerInterface $em,
+        Security $security,
+        Request $request
+    ): Response {
+        $currentUser = $security->getUser();
 
-        if ($friendship->getUser() !== $user && $friendship->getFriend() !== $user) {
-            return $this->handleResponse($request, 'danger', 'You cannot remove this friendship.', 403);
+        // Trouver la relation entre les deux utilisateurs
+        $friendship = $friendshipRepository->createQueryBuilder('f')
+            ->where('(f.user = :u1 AND f.friend = :u2) OR (f.user = :u2 AND f.friend = :u1)')
+            ->setParameter('u1', $currentUser)
+            ->setParameter('u2', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$friendship) {
+            return $this->handleResponse($request, 'danger', 'Friendship not found.', 404);
         }
 
         $em->remove($friendship);
@@ -146,9 +160,9 @@ class FriendshipController extends AbstractController
             return new Response('', 204);
         }
 
-        $friends = $friendshipRepository->findFriends($user);
-        $pendingReceived = $friendshipRepository->findPendingRequestsReceived($user);
-        $pendingSent = $friendshipRepository->findPendingRequestsSent($user);
+        $friends = $friendshipRepository->findFriendsOfUser($user);
+        $pendingReceived = $friendshipRepository->findPendingReceivedByUser($user);
+        $pendingSent = $friendshipRepository->findPendingSentByUser($user);
 
         return $this->render('friendship/_sidebar.html.twig', [
             'friends' => $friends,
