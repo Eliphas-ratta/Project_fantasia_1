@@ -24,7 +24,6 @@
                     {{ form_label(form.image, 'Image', {'label_attr': {'class': 'form-label'}}) }}
                     <div class="image-upload d-flex align-items-center gap-2">
                         {{ form_widget(form.image, {'attr': {'class': 'input-field'}}) }}
-                        
                     </div>
                 </div>
             </div>
@@ -43,8 +42,17 @@
                         </div>
 
                         <div class="d-flex align-items-center gap-3">
-                            <input type="checkbox" name="friends[{{ friend.id }}][selected]" value="1" class="checkbox-green">
-                            <div class="role-select d-flex align-items-center gap-1">
+                            <input 
+                                type="checkbox" 
+                                name="friends[{{ friend.id }}][selected]" 
+                                value="1" 
+                                class="checkbox-green friend-checkbox" 
+                                data-friend-id="{{ friend.id }}"
+                            >
+
+                            <div class="role-select d-flex align-items-center gap-1 friend-role" 
+                                 id="role-{{ friend.id }}" 
+                                 style="display:none; opacity:0; transition: opacity 0.3s ease;">
                                 <label>Role:</label>
                                 <select name="friends[{{ friend.id }}][role]" class="role-dropdown">
                                     <option value="VIEWER" selected>Observer</option>
@@ -55,7 +63,7 @@
                         </div>
                     </div>
                 {% else %}
-                    <p class="text-center text-muted mt-3">You have no friends to add yet 😅</p>
+                    <p class="text-center mt-3">You have no friends to add yet 😅</p>
                 {% endfor %}
             </div>
 
@@ -65,4 +73,38 @@
         {{ form_end(form) }}
     </div>
 </div>
+
+{# ✅ Script JS pour afficher le rôle uniquement si la case est cochée #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // On s’assure que tous les rôles soient cachés au départ
+    document.querySelectorAll('.friend-role').forEach(role => {
+        role.style.display = 'none';
+        role.style.opacity = '0';
+    });
+
+    // On gère les checkbox
+    document.querySelectorAll('.friend-checkbox').forEach(checkbox => {
+        const friendId = checkbox.dataset.friendId;
+        const roleDiv = document.getElementById(`role-${friendId}`);
+
+        // S’il est coché dès le chargement (rare mais on gère)
+        if (checkbox.checked) {
+            roleDiv.style.display = 'flex';
+            setTimeout(() => roleDiv.style.opacity = '1', 10);
+        }
+
+        // Sur changement d’état
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                roleDiv.style.display = 'flex';
+                setTimeout(() => roleDiv.style.opacity = '1', 10);
+            } else {
+                roleDiv.style.opacity = '0';
+                setTimeout(() => roleDiv.style.display = 'none', 300); // attend la fin du fade-out
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

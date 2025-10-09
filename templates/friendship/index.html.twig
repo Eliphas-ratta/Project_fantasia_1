@@ -8,17 +8,15 @@
     <h4 class="mb-3"> Friends</h4>
 
     <!-- Search + Add Friend -->
-   <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search">
-  <input type="hidden" name="_token" value="{{ csrf_token('add_friend') }}">
-  <input type="text" name="username" placeholder="Enter username" required>
-  <button type="submit">Add</button>
-</form>
+    <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search mb-3">
+      <input type="hidden" name="_token" value="{{ csrf_token('add_friend') }}">
+      <input type="text" name="username" placeholder="Enter username" required>
+      <button type="submit">Add</button>
+    </form>
 
-
-    <!-- Accepted Friends -->
+    <!-- ✅ Accepted Friends -->
     <span class="section-label">✅ Accepted</span>
-    {% for f in friends %}
-      {% set friendUser = f.user.id == app.user.id ? f.friend : f.user %}
+    {% for friendUser in friends %}
       <div class="friend-item">
         <div class="friend-info">
           {% if friendUser.profileImage %}
@@ -31,11 +29,11 @@
           <span class="friend-name">{{ friendUser.username }}</span>
         </div>
         <div class="friend-actions">
-          <a href="{{ path('app_friend_remove', {id: f.id}) }}" class="btn-decline">✖</a>
+          <a href="{{ path('app_friend_remove', {id: friendUser.id}) }}" class="btn-decline">✖</a>
         </div>
       </div>
     {% else %}
-      <p class="">No friends yet</p>
+      <p>No friends yet</p>
     {% endfor %}
 
     <!-- Requests Received -->
@@ -58,7 +56,7 @@
         </div>
       </div>
     {% else %}
-      <p class="">No pending requests</p>
+      <p>No pending requests</p>
     {% endfor %}
 
     <!-- Requests Sent -->
@@ -81,7 +79,7 @@
         </div>
       </div>
     {% else %}
-      <p class="">No sent requests</p>
+      <p>No sent requests</p>
     {% endfor %}
   </div>
 </div>
@@ -142,14 +140,9 @@
 
   .btn-accept { background: #28a745; }
   .btn-decline { background: #dc3545; }
-    .friends-search {
-        color: #2a2a2a;
-
-     }
 
   .friends-search input::placeholder {
     color: #fff;
-    
   }
 </style>
 {% endblock %}
