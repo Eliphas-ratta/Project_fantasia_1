@@ -1,0 +1,164 @@
+<!-- Bloc infos monde -->
+<div class="admin-world-card p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-start flex-wrap">
+    <div class="d-flex gap-3 align-items-start flex-wrap">
+      <img src="{{ asset('uploads/world_images/' ~ (world.image ?? 'default.png')) }}" 
+           alt="{{ world.name }}" class="admin-world-img">
+
+      <div>
+        <h4 class="fw-bold mb-2">{{ world.name }}</h4>
+        <p class="small mb-3">{{ world.description ?: 'Description of the world' }}</p>
+
+        <form action="{{ path('app_world_update', {id: world.id}) }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-2">
+          <input type="text" name="name" value="{{ world.name }}" class="input-field">
+          <textarea name="description" class="textarea-field">{{ world.description }}</textarea>
+          <input type="file" name="image" class="form-control">
+          <button class="btn-green mt-2">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    {% if world.createdBy.id == app.user.id %}
+      <form action="{{ path('app_world_delete', {id: world.id}) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this world?');">
+        <button class="btn-danger mt-3">Delete World</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Bloc utilisateurs -->
+<div class="admin-users-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold">Users</h4>
+    <form action="{{ path('app_world_add_member', {id: world.id}) }}" method="POST" class="d-flex gap-2">
+      <select name="friend_username" class="user-select-input">
+        {% for f in friends %}
+          <option value="{{ f.username }}">{{ f.username }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn-green">Add</button>
+    </form>
+  </div>
+
+  {% for wur in users %}
+    <div class="user-row d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background-color:#1a1a1a;">
+      
+      <!-- Infos utilisateur -->
+      <div class="d-flex align-items-center gap-2">
+        <img src="{{ asset('uploads/profile_images/' ~ (wur.user.profileImage ?? 'default.png')) }}" 
+             class="user-avatar {% if wur.role == 'ADMIN' %}role-admin{% elseif wur.role == 'MODERATOR' %}role-moderator{% else %}role-viewer{% endif %}" 
+             alt="">
+
+        <span class="fw-semibold d-flex align-items-center gap-1">
+          {{ wur.user.username }}
+
+          {% if world.createdBy.id == wur.user.id %}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="#ffcc33" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 class="creator-crown" title="World Creator">
+              <path d="M2 18l2-10 5 5 5-5 5 5 2-10 3 15H-1z"/>
+            </svg>
+          {% endif %}
+        </span>
+      </div>
+
+      <!-- Sélecteur de rôle + suppression -->
+      <div class="d-flex align-items-center gap-2">
+        <label class="small">Role:</label>
+        <select class="role-dropdown role-select"
+                data-user-id="{{ wur.user.id }}"
+                data-world-id="{{ world.id }}"
+                {% if wur.user == app.user or (wur.role == 'ADMIN' and world.createdBy.id != app.user.id) %}disabled{% endif %}>
+          <option value="VIEWER" {{ wur.role == 'VIEWER' ? 'selected' }}>Viewer</option>
+          <option value="MODERATOR" {{ wur.role == 'MODERATOR' ? 'selected' }}>Moderator</option>
+          <option value="ADMIN" {{ wur.role == 'ADMIN' ? 'selected' }}>Admin</option>
+        </select>
+
+        {# 🔒 Conditions pour afficher le bouton "Ban" #}
+        {% if wur.user != app.user and wur.user.id != world.createdBy.id %}
+  {% if wur.role != 'ADMIN' or world.createdBy.id == app.user.id %}
+    <a href="{{ path('app_world_remove_member', {id: world.id, userId: wur.user.id}) }}" 
+       class="btn-ban" title="Ban or remove this member">
+      <img 
+        src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjNiM2IiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1nYXZlbC1pY29uIGx1Y2lkZS1nYXZlbCI+PHBhdGggZD0ibTE0IDEzLTguMzgxIDguMzhhMSAxIDAgMCAxLTMuMDAxLTNsOC4zODQtOC4zODEiLz48cGF0aCBkPSJtMTYgMTYgNi02Ii8+PHBhdGggZD0ibTIxLjUgMTAuNS04LThNOC44NjYgOC44NjYgMTQuODY2IDIuODY2Ii8+PHBhdGggZD0ibTguNSA3LjUgOCA4Ii8+PC9zdmc+" 
+        alt="Ban"
+        class="ban-icon">
+    </a>
+  {% endif %}
+{% endif %}
+
+
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Script de mise à jour des rôles -->
+<script>
+document.querySelectorAll('.role-select').forEach(select => {
+  select.addEventListener('change', async (e) => {
+    const userId = e.target.dataset.userId;
+    const worldId = e.target.dataset.worldId;
+    const newRole = e.target.value;
+
+    const response = await fetch(`/world/${worldId}/update-role`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `userId=${userId}&role=${newRole}`
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      e.target.style.boxShadow = '0 0 8px #3ecf5a';
+      setTimeout(() => e.target.style.boxShadow = '', 800);
+    } else {
+      e.target.style.boxShadow = '0 0 8px #ff4040';
+      alert(result.error || 'An error occurred');
+    }
+  });
+});
+</script>
+
+<!-- Style des icônes -->
+<style>
+.creator-crown {
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  stroke: #ffcc33;
+  filter: drop-shadow(0 0 4px #ffe680);
+  transition: all 0.2s ease;
+}
+.creator-crown:hover {
+  transform: scale(1.2) rotate(-5deg);
+  filter: drop-shadow(0 0 6px #fff4b0);
+}
+
+.btn-ban {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ban-icon {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 0 3px #ff3b3b66);
+}
+
+.btn-ban:hover .ban-icon {
+  transform: scale(1.15) rotate(-10deg);
+  filter: drop-shadow(0 0 8px #ff0000aa);
+}
+
+
+
+</style>

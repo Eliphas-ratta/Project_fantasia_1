@@ -196,27 +196,31 @@ public function addMember(
 }
 
 
-  #[Route(path: '/world/{id}/admin', name: 'app_world_admin')]
-public function admin(World $world, FriendshipRepository $friendRepo): Response
+#[Route('/world/{id}/admin/{section}', name: 'app_world_admin', defaults: ['section' => 'world'])]
+
+public function admin(World $world, string $section = 'world', FriendshipRepository $friendRepo): Response
 {
     $user = $this->getUser();
-
-    // ✅ Vérifie le rôle du user dans ce monde
     $role = $world->getRoleForUser($user);
 
     if ($role !== 'ADMIN') {
         throw $this->createAccessDeniedException('You are not an admin of this world.');
     }
 
-     // 🔹 Récupère la liste d’amis
     $friends = $friendRepo->findFriendsOfUser($user);
+
+    // 🔹 Tu pourras charger les logs ici si nécessaire
+    $logs = ($section === 'log') ? [] : null;
 
     return $this->render('world/admin.html.twig', [
         'world' => $world,
         'users' => $world->getWorldUserRoles(),
         'friends' => $friends,
+        'logs' => $logs,
+        'section' => $section,
     ]);
 }
+
 
 #[Route('/world/{id}/update', name: 'app_world_update', methods: ['POST'])]
 public function update(
@@ -290,9 +294,9 @@ public function delete(World $world, EntityManagerInterface $em): Response
 
     // 🔒 Vérifie que l'utilisateur est bien admin du monde
     $role = $world->getRoleForUser($user);
-    if ($role !== 'ADMIN') {
-        throw $this->createAccessDeniedException('You are not allowed to delete this world.');
-    }
+    if ($world->getCreatedBy() !== $user) {
+    throw $this->createAccessDeniedException('Only the world creator can delete this world.');
+}
 
     // 🧹 Supprime d'abord les relations WorldUserRole
     foreach ($world->getWorldUserRoles() as $wur) {
@@ -320,14 +324,12 @@ public function removeMember(
     EntityManagerInterface $em
 ): Response {
     $user = $this->getUser();
-
-    // 🔒 Vérifie que l'utilisateur est bien admin
     $role = $world->getRoleForUser($user);
+
     if ($role !== 'ADMIN') {
         throw $this->createAccessDeniedException('You are not allowed to remove members.');
     }
 
-    // 🔍 Trouve le membre à retirer
     $memberRole = $em->getRepository(WorldUserRole::class)->findOneBy([
         'user' => $userId,
         'world' => $world,
@@ -338,13 +340,40 @@ public function removeMember(
         return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
     }
 
-    // 🚫 Empêche de supprimer un admin
-    if ($memberRole->getRole() === 'ADMIN') {
-        $this->addFlash('danger', 'You cannot remove another admin.');
+    $memberUser = $memberRole->getUser();
+    $creator = $world->getCreatedBy();
+
+    // 🚫 1. Empêche de retirer le créateur du monde
+    if ($memberUser === $creator) {
+        $this->addFlash('danger', 'The world creator cannot be removed.');
         return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
     }
 
-    // ✅ Supprime la relation
+    // 🚫 2. Empêche un admin de se retirer lui-même
+    if ($memberUser === $user) {
+        $this->addFlash('danger', 'You cannot remove yourself from the world.');
+        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+    }
+
+    // 🔒 3. Empêche un admin non-créateur de retirer un autre admin
+    if ($memberRole->getRole() === 'ADMIN' && $creator !== $user) {
+        $this->addFlash('danger', 'Only the world creator can remove another admin.');
+        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+    }
+
+    // 🔒 4. Empêche de supprimer le dernier admin
+    if ($memberRole->getRole() === 'ADMIN') {
+        $adminCount = count(array_filter(
+            $world->getWorldUserRoles()->toArray(),
+            fn($wur) => $wur->getRole() === 'ADMIN'
+        ));
+        if ($adminCount <= 1) {
+            $this->addFlash('danger', 'You cannot remove the last admin.');
+            return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+        }
+    }
+
+    // ✅ Suppression autorisée
     $em->remove($memberRole);
     $em->flush();
 
@@ -352,6 +381,80 @@ public function removeMember(
     return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
 }
 
+
+#[Route('/world/{id}/update-role', name: 'app_world_update_role', methods: ['POST'])]
+public function updateRole(
+    World $world,
+    Request $request,
+    EntityManagerInterface $em
+): Response {
+    $user = $this->getUser();
+    $role = $world->getRoleForUser($user);
+
+    if ($role !== 'ADMIN') {
+        return $this->json(['error' => 'Access denied'], 403);
+    }
+
+    $userId = $request->request->get('userId');
+    $newRole = strtoupper($request->request->get('role'));
+
+    if (!in_array($newRole, ['ADMIN', 'MODERATOR', 'VIEWER'])) {
+        return $this->json(['error' => 'Invalid role'], 400);
+    }
+
+    $targetRole = $em->getRepository(\App\Entity\WorldUserRole::class)->findOneBy([
+        'world' => $world,
+        'user' => $userId,
+    ]);
+
+    if (!$targetRole) {
+        return $this->json(['error' => 'User not found in this world'], 404);
+    }
+
+    $targetUser = $targetRole->getUser();
+
+ // ✅ Protection : Seul le créateur peut modifier un ADMIN
+$creatorId = method_exists($world->getCreatedBy(), 'getId') ? $world->getCreatedBy()->getId() : null;
+$currentUserId = method_exists($this->getUser(), 'getId') ? $this->getUser()->getId() : null;
+
+if (
+    $targetRole->getRole() === 'ADMIN' &&
+    $creatorId !== null &&
+    $currentUserId !== null &&
+    $creatorId !== $currentUserId
+) {
+    return $this->json(['error' => 'Only the world creator can modify or demote another admin.'], 403);
+}
+
+
+
+
+
+    // ✅ Protection : Un admin ne peut pas se modifier lui-même
+    if ($targetUser === $user) {
+        return $this->json(['error' => 'You cannot change your own role.'], 400);
+    }
+
+    // ✅ Protection : empêche de supprimer le dernier admin
+    if ($targetRole->getRole() === 'ADMIN' && $newRole !== 'ADMIN') {
+        $adminCount = count(array_filter(
+            $world->getWorldUserRoles()->toArray(),
+            fn($wur) => $wur->getRole() === 'ADMIN'
+        ));
+        if ($adminCount <= 1) {
+            return $this->json(['error' => 'Cannot remove the last admin.'], 400);
+        }
+    }
+
+    $targetRole->setRole($newRole);
+    $em->flush();
+
+    return $this->json([
+        'success' => true,
+        'newRole' => $newRole,
+        'message' => sprintf('%s role updated to %s', $targetUser->getUsername(), $newRole)
+    ]);
+}
 
 
 
