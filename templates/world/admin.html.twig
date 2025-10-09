@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin World - {{ world.name }}{% endblock %}
+
+{% block body %}
+<div class="world-admin-wrapper text-light py-5">
+  <div class="container">
+
+    <h2 class="text-center mb-4 fw-bold">Admin World</h2>
+
+    <div class="d-flex gap-4">
+      <!-- Menu latéral -->
+      <div class="side-menu">
+        <a href="#" class="menu-item active">⚙️ World</a>
+        <a href="#" class="menu-item">🧾 Log</a>
+      </div>
+
+      <!-- Zone principale -->
+      <div class="flex-grow-1">
+
+        <!-- Bloc infos monde -->
+        <div class="admin-world-card p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div class="d-flex gap-3 align-items-start flex-wrap">
+              <img src="{{ asset('uploads/world_images/' ~ (world.image ?? 'default.png')) }}" 
+                   alt="{{ world.name }}" class="admin-world-img">
+
+              <div>
+                <h4 class="fw-bold mb-2">{{ world.name }}</h4>
+                <p class="small mb-3">{{ world.description ?: 'Description of the world' }}</p>
+
+                <form action="{{ path('app_world_update', {id: world.id}) }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-2">
+                  <input type="text" name="name" value="{{ world.name }}" class="input-field">
+                  <textarea name="description" class="textarea-field">{{ world.description }}</textarea>
+                  <input type="file" name="image" class="form-control">
+                  <button class="btn-green mt-2">Save Changes</button>
+                </form>
+              </div>
+            </div>
+
+            <form action="{{ path('app_world_delete', {id: world.id}) }}" method="POST">
+              <button class="btn-danger mt-3">Delete World</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bloc utilisateurs -->
+        <div class="admin-users-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold">Users</h4>
+            <form action="{{ path('app_world_add_member', {id: world.id}) }}" method="POST" class="d-flex gap-2">
+              <select name="friend_username" class="user-select-input">
+                {% for f in friends %}
+                  <option value="{{ f.username }}">{{ f.username }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn-green">Add</button>
+            </form>
+          </div>
+
+          {% for wur in users %}
+            <div class="user-row d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background-color:#1a1a1a;">
+              <div class="d-flex align-items-center gap-2">
+                <img src="{{ asset('uploads/profile_images/' ~ (wur.user.profileImage ?? 'default.png')) }}" 
+                     class="user-avatar {% if wur.role == 'ADMIN' %}role-admin{% elseif wur.role == 'MODERATOR' %}role-moderator{% else %}role-viewer{% endif %}" alt="">
+                <span class="fw-semibold">{{ wur.user.username }}</span>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                <label class="small">Role:</label>
+                <select class="role-dropdown" {% if wur.user == app.user or wur.role == 'ADMIN' %}disabled{% endif %}>
+                  <option value="VIEWER" {{ wur.role == 'VIEWER' ? 'selected' }}>Viewer</option>
+                  <option value="MODERATOR" {{ wur.role == 'MODERATOR' ? 'selected' }}>Moderator</option>
+                  <option value="ADMIN" {{ wur.role == 'ADMIN' ? 'selected' }}>Admin</option>
+                </select>
+                {% if wur.role != 'ADMIN' %}
+                  <a href="{{ path('app_world_remove_member', {id: world.id, userId: wur.user.id}) }}" class="btn-remove">🔴</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

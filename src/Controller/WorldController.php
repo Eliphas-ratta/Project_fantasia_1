@@ -196,4 +196,164 @@ public function addMember(
 }
 
 
+  #[Route(path: '/world/{id}/admin', name: 'app_world_admin')]
+public function admin(World $world, FriendshipRepository $friendRepo): Response
+{
+    $user = $this->getUser();
+
+    // ✅ Vérifie le rôle du user dans ce monde
+    $role = $world->getRoleForUser($user);
+
+    if ($role !== 'ADMIN') {
+        throw $this->createAccessDeniedException('You are not an admin of this world.');
+    }
+
+     // 🔹 Récupère la liste d’amis
+    $friends = $friendRepo->findFriendsOfUser($user);
+
+    return $this->render('world/admin.html.twig', [
+        'world' => $world,
+        'users' => $world->getWorldUserRoles(),
+        'friends' => $friends,
+    ]);
+}
+
+#[Route('/world/{id}/update', name: 'app_world_update', methods: ['POST'])]
+public function update(
+    World $world,
+    Request $request,
+    EntityManagerInterface $em
+): Response {
+    $user = $this->getUser();
+
+    // Vérifie que le user est bien admin de ce monde
+    $role = $world->getRoleForUser($user);
+    if ($role !== 'ADMIN') {
+        throw $this->createAccessDeniedException('You are not allowed to update this world.');
+    }
+
+    // Récupère les données du formulaire
+    $name = trim($request->request->get('name'));
+    $description = trim($request->request->get('description'));
+    $imageFile = $request->files->get('image');
+
+    if ($name) {
+        $world->setName($name);
+    }
+
+    if ($description) {
+        $world->setDescription($description);
+    }
+
+    // ✅ Si une nouvelle image est uploadée
+    if ($imageFile) {
+        $uploadDir = $this->getParameter('world_images_directory');
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $extension = strtolower($imageFile->guessExtension());
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+        if (!in_array($extension, $allowed)) {
+            $this->addFlash('danger', 'Invalid image format.');
+            return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+        }
+
+        $fileName = uniqid() . '.' . $extension;
+        $filePath = $uploadDir . '/' . $fileName;
+
+        // Conversion avec Intervention Image
+        $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        $image = $manager->read($imageFile->getPathname());
+        $image->cover(1024, 1024, position: 'center')->save($filePath, 85);
+
+        // Supprime l’ancienne image si elle existe
+        if ($world->getImage() && file_exists($uploadDir . '/' . $world->getImage())) {
+            unlink($uploadDir . '/' . $world->getImage());
+        }
+
+        $world->setImage($fileName);
+    }
+
+    $em->flush();
+
+    $this->addFlash('success', 'World updated successfully!');
+    return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+}
+
+#[Route('/world/{id}/delete', name: 'app_world_delete', methods: ['POST'])]
+public function delete(World $world, EntityManagerInterface $em): Response
+{
+    $user = $this->getUser();
+
+    // 🔒 Vérifie que l'utilisateur est bien admin du monde
+    $role = $world->getRoleForUser($user);
+    if ($role !== 'ADMIN') {
+        throw $this->createAccessDeniedException('You are not allowed to delete this world.');
+    }
+
+    // 🧹 Supprime d'abord les relations WorldUserRole
+    foreach ($world->getWorldUserRoles() as $wur) {
+        $em->remove($wur);
+    }
+
+    // 🧼 Supprime l'image du monde si elle existe
+    $uploadDir = $this->getParameter('world_images_directory');
+    if ($world->getImage() && file_exists($uploadDir . '/' . $world->getImage())) {
+        unlink($uploadDir . '/' . $world->getImage());
+    }
+
+    // 🗑️ Supprime le monde
+    $em->remove($world);
+    $em->flush();
+
+    $this->addFlash('info', 'World deleted successfully.');
+    return $this->redirectToRoute('app_world_index');
+}
+
+#[Route('/world/{id}/remove-member/{userId}', name: 'app_world_remove_member')]
+public function removeMember(
+    World $world,
+    int $userId,
+    EntityManagerInterface $em
+): Response {
+    $user = $this->getUser();
+
+    // 🔒 Vérifie que l'utilisateur est bien admin
+    $role = $world->getRoleForUser($user);
+    if ($role !== 'ADMIN') {
+        throw $this->createAccessDeniedException('You are not allowed to remove members.');
+    }
+
+    // 🔍 Trouve le membre à retirer
+    $memberRole = $em->getRepository(WorldUserRole::class)->findOneBy([
+        'user' => $userId,
+        'world' => $world,
+    ]);
+
+    if (!$memberRole) {
+        $this->addFlash('warning', 'This user is not part of this world.');
+        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+    }
+
+    // 🚫 Empêche de supprimer un admin
+    if ($memberRole->getRole() === 'ADMIN') {
+        $this->addFlash('danger', 'You cannot remove another admin.');
+        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+    }
+
+    // ✅ Supprime la relation
+    $em->remove($memberRole);
+    $em->flush();
+
+    $this->addFlash('info', 'User removed from world.');
+    return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+}
+
+
+
+
+
 }

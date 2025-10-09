@@ -449,4 +449,14 @@ class World
 
         return $this;
     }
+
+    public function getRoleForUser(User $user): ?string
+{
+    foreach ($this->getWorldUserRoles() as $relation) {
+        if ($relation->getUser() === $user) {
+            return $relation->getRole();
+        }
+    }
+    return null;
+}
 }
