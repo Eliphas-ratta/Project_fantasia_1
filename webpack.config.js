@@ -25,6 +25,8 @@ Encore
     .addEntry('sidebarjs', './assets/scripts/sidebar.js')
     .addStyleEntry('sidebarcss', './assets/styles/sidebar.scss')
     .addStyleEntry('world', './assets/styles/world.scss')
+    .addEntry('world-actions', './assets/world-actions.js')
+
 
 
 

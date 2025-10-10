@@ -19,9 +19,10 @@
     </div>
 
     {% if world.createdBy.id == app.user.id %}
-      <form action="{{ path('app_world_delete', {id: world.id}) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this world?');">
-        <button class="btn-danger mt-3">Delete World</button>
-      </form>
+     <form action="{{ path('app_world_delete', {id: world.id}) }}" method="POST" class="delete-world-form">
+  <button type="submit" class="btn-danger mt-3">Delete World</button>
+</form>
+
     {% endif %}
   </div>
 </div>
@@ -162,3 +163,6 @@ document.querySelectorAll('.role-select').forEach(select => {
 
 
 </style>
+
+{{ encore_entry_script_tags('world-actions') }}
+

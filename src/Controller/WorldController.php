@@ -318,18 +318,9 @@ public function delete(World $world, EntityManagerInterface $em): Response
 }
 
 #[Route('/world/{id}/remove-member/{userId}', name: 'app_world_remove_member')]
-public function removeMember(
-    World $world,
-    int $userId,
-    EntityManagerInterface $em
-): Response {
+public function removeMember(World $world, int $userId, EntityManagerInterface $em): Response
+{
     $user = $this->getUser();
-    $role = $world->getRoleForUser($user);
-
-    if ($role !== 'ADMIN') {
-        throw $this->createAccessDeniedException('You are not allowed to remove members.');
-    }
-
     $memberRole = $em->getRepository(WorldUserRole::class)->findOneBy([
         'user' => $userId,
         'world' => $world,
@@ -337,31 +328,46 @@ public function removeMember(
 
     if (!$memberRole) {
         $this->addFlash('warning', 'This user is not part of this world.');
-        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
+        return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
     }
 
     $memberUser = $memberRole->getUser();
     $creator = $world->getCreatedBy();
+    $currentRole = $world->getRoleForUser($user);
 
-    // 🚫 1. Empêche de retirer le créateur du monde
+    // ✅ Cas 1 : l'utilisateur se retire lui-même (autorisé)
+    if ($memberUser === $user) {
+        // Empêche le créateur de se retirer
+        if ($memberUser === $creator) {
+            $this->addFlash('danger', 'The world creator cannot leave their own world.');
+            return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+        }
+
+        $em->remove($memberRole);
+        $em->flush();
+
+        $this->addFlash('info', 'You have left the world.');
+        return $this->redirectToRoute('app_world_index');
+    }
+
+    // ✅ Cas 2 : un admin retire quelqu’un d’autre
+    if ($currentRole !== 'ADMIN') {
+        throw $this->createAccessDeniedException('You are not allowed to remove members.');
+    }
+
+    // 🚫 Empêche de retirer le créateur
     if ($memberUser === $creator) {
         $this->addFlash('danger', 'The world creator cannot be removed.');
         return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
     }
 
-    // 🚫 2. Empêche un admin de se retirer lui-même
-    if ($memberUser === $user) {
-        $this->addFlash('danger', 'You cannot remove yourself from the world.');
-        return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
-    }
-
-    // 🔒 3. Empêche un admin non-créateur de retirer un autre admin
+    // 🚫 Empêche un admin non-créateur de retirer un autre admin
     if ($memberRole->getRole() === 'ADMIN' && $creator !== $user) {
         $this->addFlash('danger', 'Only the world creator can remove another admin.');
         return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
     }
 
-    // 🔒 4. Empêche de supprimer le dernier admin
+    // 🚫 Empêche de supprimer le dernier admin
     if ($memberRole->getRole() === 'ADMIN') {
         $adminCount = count(array_filter(
             $world->getWorldUserRoles()->toArray(),
@@ -380,6 +386,7 @@ public function removeMember(
     $this->addFlash('info', 'User removed from world.');
     return $this->redirectToRoute('app_world_admin', ['id' => $world->getId()]);
 }
+
 
 
 #[Route('/world/{id}/update-role', name: 'app_world_update_role', methods: ['POST'])]
