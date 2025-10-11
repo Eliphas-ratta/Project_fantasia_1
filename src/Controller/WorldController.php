@@ -163,13 +163,19 @@ public function addMember(
     UserRepository $userRepo
 ): Response {
     $user = $this->getUser();
-    if (!$user) return $this->redirectToRoute('app_login');
+    if (!$user) {
+        return $this->json(['error' => 'You must be logged in.'], 401);
+    }
 
-    $friendId = $request->request->get('friend_id');
-    if (!$friendId) return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+    $friendUsername = $request->request->get('friend_username');
+    if (!$friendUsername) {
+        return $this->json(['error' => 'No friend selected.'], 400);
+    }
 
-    $friend = $userRepo->find($friendId);
-    if (!$friend) return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+    $friend = $userRepo->findOneBy(['username' => $friendUsername]);
+    if (!$friend) {
+        return $this->json(['error' => 'Friend not found.'], 404);
+    }
 
     // Vérifie si déjà membre
     $existing = $em->getRepository(WorldUserRole::class)->findOneBy([
@@ -178,8 +184,7 @@ public function addMember(
     ]);
 
     if ($existing) {
-        $this->addFlash('warning', 'This user is already in the world.');
-        return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+        return $this->json(['error' => 'This user is already in the world.'], 400);
     }
 
     // Ajoute comme VIEWER par défaut
@@ -191,8 +196,11 @@ public function addMember(
     $em->persist($role);
     $em->flush();
 
-    $this->addFlash('success', $friend->getUsername() . ' has been added to the world!');
-    return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+    return $this->json([
+        'success' => true,
+        'username' => $friend->getUsername(),
+        'role' => $role->getRole(),
+    ]);
 }
 
 

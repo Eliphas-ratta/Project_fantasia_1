@@ -1,3 +1,5 @@
+
+
 // --- Global wrapper ---
 .world-wrapper {
   min-height: 100vh;
@@ -517,4 +519,115 @@
     border: 2px solid #ff4040;
     box-shadow: 0 0 6px rgba(255, 64, 64, 0.6);
   }
+
+/* ============================
+   🎨 Custom Friend Selector
+   ============================ */
+
+.custom-select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-select-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #121212;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-select-button:hover {
+  background: #1e1e1e;
+  border-color: #3ecf5a;
+}
+
+.select-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.custom-select-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  z-index: 50;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.custom-select-dropdown.open {
+  display: block;
+  animation: fadeIn 0.15s ease-in;
+}
+
+.select-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.15s ease;
+}
+
+.select-item:hover {
+  background: #2a2a2a;
+  color: #3ecf5a;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ===========================
+   🌟 Effet de transition de rôle
+   =========================== */
+
+@keyframes rolePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+}
+
+.user-avatar.role-changed {
+  animation: rolePulse 0.6s ease-out;
+}
 
