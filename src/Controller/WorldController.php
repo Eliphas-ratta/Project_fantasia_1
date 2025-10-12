@@ -60,11 +60,11 @@ class WorldController extends AbstractController
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 $extension = strtolower($imageFile->guessExtension());
-                $allowed = ['jpg', 'jpeg', 'png'];
+                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
                 // 🔸 Vérifie le format autorisé
                 if (!in_array($extension, $allowed)) {
-                    $this->addFlash('danger', 'Invalid image format (only JPG and PNG are allowed).');
+                    $this->addFlash('danger', 'Invalid image format (only JPG, JPEG, WEBP and PNG are allowed).');
                     return $this->redirectToRoute('app_world_create');
                 }
 
