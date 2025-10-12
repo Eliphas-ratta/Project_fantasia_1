@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ world.name }} — Factions{% endblock %}
+
+{% block body %}
+<div class="world-index-wrapper text-light">
+  <div class="container text-center">
+    <h1 class="mb-4 fw-bold">Factions of {{ world.name }}</h1>
+
+    <a href="#" class="btn-green mb-5">
+      + Create a new Faction
+    </a>
+
+    {% if factions is empty %}
+      <p class="mt-5">No factions found in this world yet.</p>
+    {% else %}
+      <div class="row justify-content-center g-4">
+        {% for faction in factions %}
+          <div class="col-md-3">
+            <a href="#" class="world-link text-decoration-none text-light">
+              <div class="world-card p-3 text-start h-100">
+                <div class="world-image mb-3">
+                  <img src="{{ asset(faction.image ? 'uploads/faction_images/' ~ faction.image : 'uploads/world_images/default.png') }}"
+                       alt="{{ faction.name }}" class="img-fluid rounded">
+                </div>
+                <h5 class="fw-bold mb-1">{{ faction.name }}</h5>
+                <p class="small mb-0">
+                  {{ faction.description|default('No description available.') }}
+                </p>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
