@@ -224,9 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rebuildCustomSelect(select);
 
        // 4) Ajoute visuellement le membre dans la liste Users (page admin ou show)
-        const userList = document.querySelector(".admin-users-card ul") || document.querySelector(".world-users-card ul");
+const userListAdmin = document.querySelector(".admin-users-card ul");
+const userListShow  = document.querySelector(".world-users-card ul");
 
-        if (userList) {
+if (userListAdmin) {
+  // --- Style pour page admin ---
   const li = document.createElement("li");
   li.className = "user-row d-flex justify-content-between align-items-center mb-3 p-2 rounded";
   li.style.backgroundColor = "#1a1a1a";
@@ -247,9 +249,27 @@ document.addEventListener("DOMContentLoaded", () => {
       </select>
     </div>
   `;
-
-  userList.appendChild(li);
+  userListAdmin.appendChild(li);
 }
+
+else if (userListShow) {
+  // --- Style pour page show ---
+  const li = document.createElement("li");
+  li.className = "d-flex align-items-center mb-3";
+  li.innerHTML = `
+    <img 
+      src="${removedImg}" 
+      alt="${result.username}" 
+      class="user-avatar role-viewer"
+    >
+    <span class="ms-3">
+      ${result.username}
+      <small class="ms-2">(Viewer)</small>
+    </span>
+  `;
+  userListShow.appendChild(li);
+}
+
 
       } catch (err) {
         console.error("❌ AJAX error:", err);

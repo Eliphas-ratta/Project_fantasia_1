@@ -30,17 +30,24 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Encode le mot de passe
-            $plainPassword = $form->get('plainPassword')->getData();
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+        // Encode le mot de passe
+        $plainPassword = $form->get('plainPassword')->getData();
+        $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            // Date d'inscription
-            $user->setCreateAt(new \DateTime());
+        // Date d'inscription
+        $user->setCreateAt(new \DateTime());
 
-            // Génère un token unique pour vérification e-mail
-            $token = Uuid::v4()->toRfc4122();
-            $user->setEmailVerificationToken($token);
-            $user->setIsVerified(false);
+        // ✅ Image de profil par défaut
+        $user->setProfileImage('default.png');
+
+        // Génère un token unique pour vérification e-mail
+        $token = Uuid::v4()->toRfc4122();
+        $user->setEmailVerificationToken($token);
+        $user->setIsVerified(false);
+
+        // Sauvegarde en base
+        $entityManager->persist($user);
+        $entityManager->flush();
 
             // Sauvegarde en base
             $entityManager->persist($user);

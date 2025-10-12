@@ -1,63 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Welcome!{% endblock %}</title>
+  <title>{% block title %}Project Fantasia{% endblock %}</title>
 
   {% block stylesheets %}
     {{ encore_entry_link_tags('app') }}
     {{ encore_entry_link_tags('custom') }}
     {{ encore_entry_link_tags('sidebarcss') }}
     {{ encore_entry_link_tags('world') }}
-
+    {{ encore_entry_link_tags('registercss') }}
   {% endblock %}
 </head>
 
-<body>
-  <!-- HEADER -->
-  <header class="navbar navbar-expand-lg navbar-dark bg-dark px-4 py-2">
+<body class="fantasia-body">
+  <!-- 🌌 HEADER -->
+  <header class="fantasia-navbar px-4 py-3">
     <div class="container-fluid d-flex justify-content-between align-items-center w-100">
-      <a class="navbar-brand text-white fw-bold" href="{{ path('app_home') }}">Project Fantasia</a>
-      <div class="d-flex gap-3">
-        <a class="nav-link text-white" href="{{ path('app_home') }}">Home</a>
-        <a class="nav-link text-white" href="{{ path('app_world_index') }}">Worlds</a>
-        <a class="nav-link text-white" href="{{ path('app_friends') }}">Friends</a>
+
+      <!-- 🔰 Logo -->
+      <a class="navbar-brand fantasia-logo" href="{{ path('app_home') }}">
+        Project Fantasia
+      </a>
+
+      <!-- 🌍 Navigation -->
+      <div class="d-flex gap-4 align-items-center">
+        <a class="nav-link-fantasia" href="{{ path('app_home') }}">Home</a>
+        <a class="nav-link-fantasia" href="{{ path('app_world_index') }}">Worlds</a>
+        {% if app.user %}
+          <a class="nav-link-fantasia" href="{{ path('app_friends') }}">Friends</a>
+        {% endif %}
       </div>
+
+      <!-- 👤 User / Auth -->
       <div class="d-flex gap-3 align-items-center">
         {% if app.user %}
           {% if app.user.profileImage %}
             <img src="{{ asset('uploads/profile_images/' ~ app.user.profileImage) }}"
                  alt="Profile" width="36" height="36"
-                 class="rounded-circle border border-light"
-                 style="object-fit: cover;">
+                 class="user-avatar-nav">
           {% endif %}
-          <a class="nav-link text-white" href="{{ path('app_profile') }}">Profile</a>
-          <a class="nav-link text-danger" href="{{ path('app_logout') }}">Log out</a>
+          <a class="nav-link-fantasia" href="{{ path('app_profile') }}">Profile</a>
+          <a class="btn-logout" href="{{ path('app_logout') }}">Logout</a>
         {% else %}
-          <a class="nav-link text-white" href="{{ path('app_login') }}">Login</a>
-          <a class="nav-link text-white" href="{{ path('app_register') }}">Register</a>
+          <a class="btn-login-nav" href="{{ path('app_login') }}">Login</a>
+          <a class="btn-register-nav" href="{{ path('app_register') }}">Register</a>
         {% endif %}
       </div>
     </div>
   </header>
 
-  <!-- Flash messages -->
-  <div class="container mt-2">
+  <!-- ⚡ FLASH MESSAGES -->
+  <div class="container mt-3">
     {% for label, messages in app.flashes %}
       {% for message in messages %}
-        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+        <div class="alert-flash alert-{{ label }}">
           {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endfor %}
     {% endfor %}
   </div>
 
-  <!-- MAIN LAYOUT -->
+  <!-- 🧭 MAIN LAYOUT -->
   <div class="container-fluid">
     <div class="row friends-row">
       {% if app.user and app.request.attributes.get('_route') == 'app_home' %}
+        <!-- 🧩 Sidebar Amis -->
         <aside id="friendsSidebar">
           <button id="toggleSidebar" aria-label="Toggle friends panel">❮</button>
 
@@ -69,6 +78,7 @@
         </aside>
       {% endif %}
 
+      <!-- 🌍 Contenu principal -->
       <main id="appMain" class="col p-4">
         {% block body %}{% endblock %}
       </main>
@@ -78,12 +88,11 @@
   {% block javascripts %}
     {{ encore_entry_script_tags('app') }}
     {{ encore_entry_script_tags('sidebarjs') }}
-    
 
-     {# ✅ Ajoute ce script pour activer la fermeture des alertes, dropdowns, modals, etc. #}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-          crossorigin="anonymous"></script>
+    <!-- ✅ Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
   {% endblock %}
 </body>
 </html>

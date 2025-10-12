@@ -2,61 +2,52 @@
 
 {% block title %}Login{% endblock %}
 
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('app') }}
+{% endblock %}
+
 {% block body %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card bg-dark text-white">
-                    <h1 class="card-header text-center">Login</h1>
-                    <div class="card-body">
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2>Sign in</h2>
+    <p class="subtitle">Welcome back to <strong>Project Fantasia</strong></p>
 
-                        {# Message d'erreur #}
-                        {% if error %}
-                            <div class="alert alert-danger">
-                                {{ error.messageKey|trans(error.messageData, 'security') }}
-                            </div>
-                        {% endif %}
+    {% if error %}
+      <div class="alert-error">
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+      </div>
+    {% endif %}
 
-                        {# Si déjà connecté #}
-                        {% if app.user %}
-                            <div class="mb-3">
-                                You are logged in as <strong>{{ app.user.userIdentifier }}</strong>, 
-                                <a href="{{ path('app_logout') }}" class="text-info">Logout</a>
-                            </div>
-                        {% endif %}
+    {% if app.user %}
+      <div class="mb-3 text-light text-center">
+        You are logged in as <strong>{{ app.user.userIdentifier }}</strong>, 
+        <a href="{{ path('app_logout') }}" class="text-success">Logout</a>
+      </div>
+    {% endif %}
 
-                        <form method="post">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" value="{{ last_username }}" name="_username" id="username"
-                                       class="form-control" autocomplete="username" required autofocus>
-                            </div>
+    <form method="post">
+      <div class="mb-3">
+        <input type="text" value="{{ last_username }}" name="_username" id="username"
+               class="input-field" placeholder="Username" autocomplete="username" required autofocus>
+      </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" name="_password" id="password"
-                                       class="form-control" autocomplete="current-password" required>
-                            </div>
+      <div class="mb-3">
+        <input type="password" name="_password" id="password"
+               class="input-field" placeholder="Password" autocomplete="current-password" required>
+      </div>
 
-                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <a href="{{ path('app_password_reset') }}" class="text-info">Forgot password?</a>
-                                <button class="btn btn-danger" type="submit">Sign in</button>
-                            </div>
-                        </form>
+      <button class="btn-login" type="submit">Sign in</button>
+    </form>
 
-                        <hr class="bg-light">
-
-                        <div class="text-center">
-                            <p>Don't have an account?
-                                <a href="{{ path('app_register') }}" class="text-info">Register</a>
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="login-footer mt-4">
+      <p><a href="{{ path('app_password_reset') }}">Forgot password?</a></p>
+      <p>Don't have an account?
+        <a href="{{ path('app_register') }}">Register here</a>
+      </p>
     </div>
+  </div>
+</div>
 {% endblock %}

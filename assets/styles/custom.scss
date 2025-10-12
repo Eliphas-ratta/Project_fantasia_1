@@ -1,39 +1,140 @@
+/* ===============================
+   🌌 Project Fantasia — Base Layout
+   =============================== */
 
-
-body {
-    background-color: rgb(37, 37, 37) !important;
+body.fantasia-body {
+  background-color: rgb(37, 37, 37) !important;
+  color: #ffffff !important;
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-h1,h2,h3,h4,h5,h6 {
-    color: white !important;
+/* === NAVBAR === */
+.fantasia-navbar {
+  background-color: #111;
+  border-bottom: 2px solid #1a1a1a;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
-p {
-    color: #ffffff !important;
+.fantasia-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #3ecf5a !important;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease-in-out, text-shadow 0.2s;
+
+  &:hover {
+    color: #34b54f !important;
+    text-shadow: 0 0 10px rgba(62, 207, 90, 0.6);
+  }
 }
 
-label {
-    color: #ffffff !important;
+.nav-link-fantasia {
+  color: #ffffff !important;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #3ecf5a !important;
+    text-shadow: 0 0 6px rgba(62, 207, 90, 0.6);
+  }
 }
 
-.bg-dark {
-    background-color:rgb(15, 15, 15) !important;
+/* === NAV BUTTONS === */
+.btn-login-nav,
+.btn-register-nav,
+.btn-logout {
+  background-color: #3ecf5a;
+  color: #000;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.nav-link {
-    transition: color 0.2s ease-in-out;
+.btn-login-nav:hover,
+.btn-register-nav:hover {
+  background-color: #34b54f;
+  box-shadow: 0 0 12px rgba(62, 207, 90, 0.6);
 }
 
-.nav-link:hover {
-    color: #0dcaf0 !important; 
+.btn-logout {
+  background-color: #ff4040;
+  color: #fff;
 }
 
-.btn-primary {
-    background-color: #0d6efd !important;
-    border-color: #0d6efd !important;
+.btn-logout:hover {
+  background-color: #ff5555;
+  box-shadow: 0 0 10px rgba(255, 64, 64, 0.5);
 }
 
-.btn-danger {
-    background-color: #df2033 !important;
-    border-color: #df2033 !important;
+/* === USER AVATAR NAV === */
+.user-avatar-nav {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3ecf5a;
+  box-shadow: 0 0 6px rgba(62, 207, 90, 0.4);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 }
+
+/* === FLASH MESSAGES === */
+.flash-container {
+  max-width: 800px;
+}
+
+.alert-flash {
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  text-align: center;
+  animation: fadeIn 0.4s ease;
+
+  &.alert-success {
+    background-color: rgba(62, 207, 90, 0.1);
+    border: 1px solid #3ecf5a;
+    color: #3ecf5a;
+  }
+
+  &.alert-error,
+  &.alert-danger {
+    background-color: rgba(255, 64, 64, 0.1);
+    border: 1px solid #ff4040;
+    color: #ff8080;
+  }
+
+  &.alert-warning {
+    background-color: rgba(255, 204, 0, 0.1);
+    border: 1px solid #ffcc00;
+    color: #ffcc00;
+  }
+}
+
+/* === MAIN === */
+.fantasia-main {
+  color: #fff;
+}
+
+/* === TEXT === */
+h1, h2, h3, h4, h5, h6 {
+  color: #fff !important;
+}
+
+p, label {
+  color: #ddd !important;
+}
+
+/* === ANIMATION === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

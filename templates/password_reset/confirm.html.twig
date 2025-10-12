@@ -1,12 +1,31 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Reset password{% endblock %}
+{% block title %}Reset Password{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('app') }}
+{% endblock %}
 
 {% block body %}
-    <h1>Set a new password</h1>
+<div class="login-wrapper">
+  <div class="login-card">
+    <h2>Reset your password</h2>
+    <p class="subtitle">Enter your new password below to regain access to your account.</p>
 
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.newPassword, { label: 'New password' }) }}
-        <button class="btn btn-success">Update password</button>
+    {{ form_start(resetForm, {'attr': {'class': 'password-reset-form'}}) }}
+      <div class="mb-3">
+        {{ form_label(resetForm.newPassword, 'New Password', {'label_attr': {'class': 'text-light fw-bold'}}) }}
+        {{ form_widget(resetForm.newPassword, {'attr': {'class': 'input-field', 'placeholder': 'Enter a new password'}}) }}
+        {{ form_errors(resetForm.newPassword) }}
+      </div>
+
+      <button type="submit" class="btn-login mt-2">Update password</button>
     {{ form_end(resetForm) }}
+
+    <div class="login-footer mt-4">
+      <p><a href="{{ path('app_login') }}">Back to login</a></p>
+    </div>
+  </div>
+</div>
 {% endblock %}

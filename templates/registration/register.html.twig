@@ -1,32 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Create your account{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('app') }}
+{% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card bg-dark">
-                    <h1 class="card-header text-center">Register</h1>
-                    <div class="card-body">
-                        {% block registration_form %}
-                            {{ form_start(registrationForm) }}
-                                {{ form_row(registrationForm.username) }}
-                                {{ form_row(registrationForm.email) }}
-                                {{ form_row(registrationForm.plainPassword.first, { label: 'Password' }) }}
-                                {{ form_row(registrationForm.plainPassword.second, { label: 'Confirm Password' }) }}
-                                {{ form_row(registrationForm.agreeTerms) }}
-                                
-                                <div class="text-center">
-                                <button type="submit" class="btn btn-danger mt-3">Register</button>
-                                </div>
+<div class="register-wrapper">
+  <div class="register-card">
+    <h2>Create your account</h2>
+    <p class="subtitle">Join <strong>Project Fantasia</strong> and begin your journey.</p>
 
-                                
-                            {{ form_end(registrationForm) }}
-                        {% endblock %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    
+    {{ form_start(registrationForm, {'attr': {'class': 'registration-form'}}) }}
+      {{ form_widget(registrationForm.username, {'attr': {'class': 'input-field', 'placeholder': 'Username'}}) }}
+      {{ form_widget(registrationForm.email, {'attr': {'class': 'input-field', 'placeholder': 'Email address'}}) }}
+      {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'input-field', 'placeholder': 'Password'}}) }}
+      {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'input-field', 'placeholder': 'Confirm password'}}) }}
+
+      <div class="form-check mt-3 mb-4">
+        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'checkbox-green'}}) }}
+        {{ form_label(registrationForm.agreeTerms, 'I agree to the terms of use', {'label_attr': {'class': 'ms-2'}}) }}
+      </div>
+
+      <button type="submit" class="btn-register glow">Register</button>
+    {{ form_end(registrationForm) }}
+
+    <div class="register-footer mt-4">
+      Already have an account?
+      <a href="{{ path('app_login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

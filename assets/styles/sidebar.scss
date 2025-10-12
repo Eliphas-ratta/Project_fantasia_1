@@ -101,14 +101,15 @@ html, body {
 
 /* --- Formulaire ajout ami --- */
 .friends-search {
-  display: flex;
+  display: grid;                     /* <— grid, pas flex */
+  grid-template-columns: 1fr auto;   /* input prend tout, bouton prend son contenu */
   gap: .5rem;
   margin-bottom: 1rem;
   width: 100%;
 }
 
 .friends-search input {
-  flex: 1;
+  min-width: 0;                      /* empêche l’input de forcer l’overflow */
   border: 1px solid #333;
   border-radius: 10px;
   padding: 0.5rem 0.75rem;
@@ -117,6 +118,7 @@ html, body {
   color: #fff;
   outline: none;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .friends-search input:focus {
@@ -124,25 +126,29 @@ html, body {
   box-shadow: 0 0 6px rgba(62, 207, 90, 0.5);
 }
 
-.friends-search input::placeholder {
-  color: #aaa;
-}
+.friends-search input::placeholder { color: #aaa; }
 
 .friends-search button {
+  box-sizing: border-box;            /* évite toute “prise de place” surprise */
+  white-space: nowrap;               /* pas de retour à la ligne sur “Add” */
+  background: #3ecf5a !important;
+  color: #fff !important;
+  font-weight: 700;
   border: none;
   border-radius: 10px;
-  padding: 0.5rem 0.9rem;
+  padding: 0.5rem 0.9rem;            /* garde la taille naturelle sans forcer la hauteur */
   font-size: 0.9rem;
-  background: #3ecf5a;
-  color: #fff;
-  font-weight: 700;
+  box-shadow: 0 0 10px rgba(62, 207, 90, 0.6);
   transition: all 0.25s;
 }
 
 .friends-search button:hover {
-  background: #34b54f;
-  box-shadow: 0 0 10px rgba(62, 207, 90, 0.7);
+  background: #34b54f !important;
+  box-shadow: 0 0 15px rgba(62, 207, 90, 0.8);
+  transform: translateY(-1px);
 }
+
+
 
 /* --- Labels --- */
 .section-label {
