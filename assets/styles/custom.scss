@@ -41,6 +41,18 @@ body.fantasia-body {
   }
 }
 
+.nav-link-fantasia-world {
+  color: #3ecf5a !important;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #3ecf5a !important;
+    text-shadow: 0 0 6px rgba(62, 207, 90, 0.6);
+  }
+}
+
 /* === NAV BUTTONS === */
 .btn-login-nav,
 .btn-register-nav,
@@ -130,6 +142,84 @@ h1, h2, h3, h4, h5, h6 {
 
 p, label {
   color: #ddd !important;
+}
+/* === FANTASIA DROPDOWN (grid 3 colonnes) === */
+.fantasia-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.fantasia-dropdown-toggle {
+  background: transparent;
+  border: none;
+  color: #3ecf5a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 6px 10px;
+  font-size: 0.95rem;
+
+  &:hover {
+    color: #3ecf5a;
+    text-shadow: 0 0 6px rgba(62, 207, 90, 0.6);
+  }
+}
+
+.fantasia-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background-color: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 420px;           /* plus large pour 3 colonnes */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  list-style: none;
+  z-index: 9999;
+
+  /* ⚠️ caché par défaut */
+  display: none;
+
+  /* grille flex en wrap */
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.fantasia-dropdown-menu.show {
+  /* visible uniquement quand .show est présent */
+  display: flex;
+  animation: fadeIn 0.25s ease forwards;
+}
+
+.fantasia-dropdown-menu li {
+  /* 3 items par ligne (avec gap) */
+  flex: 0 0 calc(33.333% - 12px);
+  text-align: center;
+}
+
+.fantasia-dropdown-menu li a {
+  display: block;
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+  background-color: #1a1a1a;
+
+  &:hover {
+    background-color: #222;
+    color: #3ecf5a;
+    box-shadow: 0 0 8px rgba(62, 207, 90, 0.5);
+  }
+}
+
+/* Animation (une seule définition) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 /* === ANIMATION === */

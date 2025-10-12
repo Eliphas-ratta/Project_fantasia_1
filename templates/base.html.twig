@@ -23,15 +23,37 @@
       <a class="navbar-brand fantasia-logo" href="{{ path('app_home') }}">
         Project Fantasia
       </a>
+<!-- 🌍 Navigation -->
+<div class="d-flex gap-4 align-items-center">
+  <a class="nav-link-fantasia" href="{{ path('app_home') }}">Home</a>
+  <a class="nav-link-fantasia" href="{{ path('app_world_index') }}">Worlds</a>
 
-      <!-- 🌍 Navigation -->
-      <div class="d-flex gap-4 align-items-center">
-        <a class="nav-link-fantasia" href="{{ path('app_home') }}">Home</a>
-        <a class="nav-link-fantasia" href="{{ path('app_world_index') }}">Worlds</a>
-        {% if app.user %}
-          <a class="nav-link-fantasia" href="{{ path('app_friends') }}">Friends</a>
-        {% endif %}
-      </div>
+  {% if app.user %}
+    <a class="nav-link-fantasia" href="{{ path('app_friends') }}">Friends</a>
+  {% endif %}
+
+  {% if currentWorld %}
+   <div class="fantasia-dropdown">
+  <button class="fantasia-dropdown-toggle">
+    Current world : {{ currentWorld.name }}
+    <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+
+  <ul class="fantasia-dropdown-menu">
+    <li><a href="#">Factions</a></li>
+    <li><a href="#">Heroes</a></li>
+    <li><a href="#">Races</a></li>
+    <li><a href="#">Events</a></li>
+  </ul>
+</div>
+
+  {% else %}
+    <a class="nav-link-fantasia" href="{{ path('app_world_index') }}">Select a World</a>
+  {% endif %}
+</div>
+
 
       <!-- 👤 User / Auth -->
       <div class="d-flex gap-3 align-items-center">

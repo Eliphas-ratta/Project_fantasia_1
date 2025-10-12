@@ -471,6 +471,17 @@ if (
     ]);
 }
 
+#[Route('/world/select/{id}', name: 'app_world_select')]
+public function select(World $world, Request $request): Response
+{
+    $session = $request->getSession();
+    $session->set('current_world_id', $world->getId());
+    $session->set('current_world_name', $world->getName());
+
+    // Redirige directement vers la page du monde
+    return $this->redirectToRoute('app_world_show', ['id' => $world->getId()]);
+}
+
 
 
 

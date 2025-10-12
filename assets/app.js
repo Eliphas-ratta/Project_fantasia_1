@@ -11,3 +11,22 @@ window.Swal = Swal;
 
 
 
+document.addEventListener('DOMContentLoaded', () => {
+  const dropdown = document.querySelector('.fantasia-dropdown');
+  const toggle = dropdown?.querySelector('.fantasia-dropdown-toggle');
+  const menu = dropdown?.querySelector('.fantasia-dropdown-menu');
+
+  if (toggle && menu) {
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      menu.classList.toggle('show');
+    });
+
+    // Fermer quand on clique ailleurs
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) {
+        menu.classList.remove('show');
+      }
+    });
+  }
+});
