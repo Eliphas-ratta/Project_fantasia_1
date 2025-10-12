@@ -22,8 +22,24 @@
           <span class="friend-name">{{ f.user.username }}</span>
         </div>
         <div class="friend-actions d-flex">
-          <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept ajax-action">✔</a>
-          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">✖</a>
+          <!-- ✅ Bouton accept (circle-check Lucide) -->
+            <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept ajax-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m9 12 2 2 4-4"></path>
+              </svg>
+            </a>
+
+
+          <!-- ❌ Bouton decline (circle-minus Lucide) -->
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
         </div>
       </div>
     {% endfor %}
@@ -46,7 +62,12 @@
           <span class="friend-name">{{ f.friend.username }}</span>
         </div>
         <div class="friend-actions">
-          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">✖</a>
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
         </div>
       </div>
     {% endfor %}
@@ -55,26 +76,30 @@
   {% endif %}
 
   <!-- Your Friends -->
-<span class="section-label">Your friends</span>
-{% if friends is not empty %}
-  {% for f in friends %}
-    <div class="friend-item">
-      <div class="friend-info">
-        {% if f.profileImage %}
-          <img src="{{ asset('uploads/profile_images/' ~ f.profileImage) }}" 
-               alt="{{ f.username }}" class="friend-avatar">
-        {% else %}
-          <div class="friend-avatar"></div>
-        {% endif %}
-        <span class="friend-name">{{ f.username }}</span>
+  <span class="section-label">Your friends</span>
+  {% if friends is not empty %}
+    {% for f in friends %}
+      <div class="friend-item">
+        <div class="friend-info">
+          {% if f.profileImage %}
+            <img src="{{ asset('uploads/profile_images/' ~ f.profileImage) }}" 
+                 alt="{{ f.username }}" class="friend-avatar">
+          {% else %}
+            <div class="friend-avatar"></div>
+          {% endif %}
+          <span class="friend-name">{{ f.username }}</span>
+        </div>
+        <div class="friend-actions">
+          <a href="{{ path('app_friend_remove', { id: f.id }) }}" class="btn-decline ajax-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
+        </div>
       </div>
-      <div class="friend-actions">
-        <a href="{{ path('app_friend_remove', { id: f.id }) }}" class="btn-decline ajax-action">✖</a>
-      </div>
-    </div>
-  {% endfor %}
-{% else %}
-  <p>No friends yet</p>
-{% endif %}
-
+    {% endfor %}
+  {% else %}
+    <p>No friends yet</p>
+  {% endif %}
 </div>

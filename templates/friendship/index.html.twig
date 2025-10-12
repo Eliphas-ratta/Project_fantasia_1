@@ -3,11 +3,12 @@
 {% block title %}My Friends{% endblock %}
 
 {% block body %}
-<div class="d-flex justify-content-center align-items-start" style="min-height: 80vh; padding-top: 2rem;">
-  <div class="friends-card bg-dark text-white p-4 rounded shadow" style="width: 500px;">
-    <h4 class="mb-3"> Friends</h4>
+<div class="friends-wrapper">
+  <div class="friends-card">
 
-    <!-- Search + Add Friend -->
+    <h2 class="title-green text-center mb-4">Friends</h2>
+
+    <!-- 🔍 Add Friend -->
     <form action="{{ path('app_friend_add') }}" method="POST" class="friends-search mb-3">
       <input type="hidden" name="_token" value="{{ csrf_token('add_friend') }}">
       <input type="text" name="username" placeholder="Enter username" required>
@@ -15,134 +16,265 @@
     </form>
 
     <!-- ✅ Accepted Friends -->
-    <span class="section-label">✅ Accepted</span>
+    <span class="section-label">Accepted</span>
     {% for friendUser in friends %}
       <div class="friend-item">
         <div class="friend-info">
           {% if friendUser.profileImage %}
             <img src="{{ asset('uploads/profile_images/' ~ friendUser.profileImage) }}"
-                 alt="{{ friendUser.username }}"
-                 class="friend-avatar">
+                 alt="{{ friendUser.username }}" class="friend-avatar">
           {% else %}
             <div class="friend-avatar"></div>
           {% endif %}
           <span class="friend-name">{{ friendUser.username }}</span>
         </div>
         <div class="friend-actions">
-          <a href="{{ path('app_friend_remove', {id: friendUser.id}) }}" class="btn-decline">✖</a>
+          <a href="{{ path('app_friend_remove', {id: friendUser.id}) }}" class="btn-decline ajax-action" title="Remove friend">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
         </div>
       </div>
     {% else %}
-      <p>No friends yet</p>
+      <p class="empty">No friends yet</p>
     {% endfor %}
 
-    <!-- Requests Received -->
-    <span class="section-label">📥 Requests Received</span>
+    <!-- 📥 Requests Received -->
+    <span class="section-label">Requests Received</span>
     {% for f in pendingReceived %}
       <div class="friend-item">
         <div class="friend-info">
           {% if f.user.profileImage %}
             <img src="{{ asset('uploads/profile_images/' ~ f.user.profileImage) }}"
-                 alt="{{ f.user.username }}"
-                 class="friend-avatar">
+                 alt="{{ f.user.username }}" class="friend-avatar">
           {% else %}
             <div class="friend-avatar"></div>
           {% endif %}
           <span class="friend-name">{{ f.user.username }}</span>
         </div>
-        <div class="friend-actions d-flex align-items-center">
-          <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept">✔</a>
-          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline">✖</a>
+        <div class="friend-actions">
+          <a href="{{ path('app_friend_accept', {id: f.id}) }}" class="btn-accept ajax-action" title="Accept">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+          </a>
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action" title="Decline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
         </div>
       </div>
     {% else %}
-      <p>No pending requests</p>
+      <p class="empty">No pending requests</p>
     {% endfor %}
 
-    <!-- Requests Sent -->
-    <span class="section-label">📤 Requests Sent</span>
+    <!-- 📤 Requests Sent -->
+    <span class="section-label">Requests Sent</span>
     {% for f in pendingSent %}
       <div class="friend-item">
         <div class="friend-info">
           {% if f.friend.profileImage %}
             <img src="{{ asset('uploads/profile_images/' ~ f.friend.profileImage) }}"
-                 alt="{{ f.friend.username }}"
-                 class="friend-avatar">
+                 alt="{{ f.friend.username }}" class="friend-avatar">
           {% else %}
             <div class="friend-avatar"></div>
           {% endif %}
           <span class="friend-name">{{ f.friend.username }}</span>
         </div>
-        <div class="friend-actions d-flex align-items-center">
-          <span class="badge bg-warning text-dark">⏳</span>
-          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline" title="Cancel request">✖</a>
+        <div class="friend-actions">
+          <!-- ⏳ Clock (Pending) -->
+          <svg class="icon-pending" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+
+          <a href="{{ path('app_friend_decline', {id: f.id}) }}" class="btn-decline ajax-action" title="Cancel request">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M8 12h8"></path>
+            </svg>
+          </a>
         </div>
       </div>
     {% else %}
-      <p>No sent requests</p>
+      <p class="empty">No sent requests</p>
     {% endfor %}
   </div>
 </div>
 
 <style>
-  .section-label {
-    display: inline-block;
-    background: #333;
-    color: #fff;
-    padding: .2rem .6rem;
-    border-radius: 8px;
-    font-size: .85rem;
-    margin: .5rem 0;
-  }
+/* ==============================
+   🌿 Friends Page — Fantasia Style
+   ============================== */
 
-  .friend-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #2a2a2a;
-    padding: .5rem .65rem;
-    border-radius: 12px;
-    margin-bottom: .6rem;
-  }
+.friends-wrapper {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 2rem;
+}
 
-  .friend-info {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-  }
+.friends-card {
+  width: 520px;
+  background: #111;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
 
-  .friend-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #666;
-    object-fit: cover;
-  }
+.title-green {
+  color: #3ecf5a;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(62, 207, 90, 0.4);
+}
 
-  .friend-name {
-    color: #fff;
-    font-size: .95rem;
-  }
+/* 🧩 Section Labels */
+.section-label {
+  display: inline-block;
+  background: #1a1a1a;
+  color: #3ecf5a;
+  padding: .25rem .7rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 1rem 0 0.6rem;
+  box-shadow: 0 0 8px rgba(62,207,90,0.15);
+}
 
-  .friend-actions a {
-    border: none;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    margin-left: .4rem;
-    font-size: 14px;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
+/* 👥 Friend item */
+.friend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1b1b1b;
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.6rem;
+  transition: all 0.2s ease;
+}
 
-  .btn-accept { background: #28a745; }
-  .btn-decline { background: #dc3545; }
+.friend-item:hover {
+  background: #222;
+  box-shadow: 0 0 10px rgba(62,207,90,0.1);
+}
 
-  .friends-search input::placeholder {
-    color: #fff;
-  }
+.friend-info {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.friend-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #3ecf5a;
+  object-fit: cover;
+  background: #333;
+}
+
+.friend-name {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* 🔘 Buttons + icons */
+.friend-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  min-width: 70px;
+}
+
+/* ✅ Accept */
+.btn-accept svg {
+  stroke: #3ecf5a;
+  transition: stroke 0.3s ease, transform 0.2s ease;
+}
+.btn-accept:hover svg {
+  stroke: #fff;
+  transform: scale(1.1);
+}
+
+/* ❌ Decline */
+.btn-decline svg {
+  stroke: #ff4040;
+  transition: stroke 0.3s ease, transform 0.2s ease;
+}
+.btn-decline:hover svg {
+  stroke: #fff;
+  transform: scale(1.1);
+}
+
+/* ⏳ Pending (Clock Icon) */
+.icon-pending {
+  stroke: #ffcc00;
+  transition: stroke 0.3s ease, transform 0.2s ease;
+  filter: drop-shadow(0 0 4px rgba(255, 204, 0, 0.5));
+}
+.icon-pending:hover {
+  stroke: #fff;
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+}
+
+/* 🕳 Empty state */
+.empty {
+  color: #999;
+  text-align: center;
+  font-style: italic;
+  margin: 0.5rem 0 1rem;
+}
+
+/* 🔍 Add friend */
+.friends-search {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+.friends-search input {
+  flex: 1;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  background: #1a1a1a;
+  color: #fff;
+  transition: all 0.2s;
+}
+.friends-search input:focus {
+  border-color: #3ecf5a;
+  box-shadow: 0 0 6px rgba(62, 207, 90, 0.5);
+}
+.friends-search button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  font-weight: 700;
+  background: #3ecf5a;
+  color: #fff;
+  transition: 0.25s;
+}
+.friends-search button:hover {
+  background: #34b54f;
+  box-shadow: 0 0 10px rgba(62, 207, 90, 0.7);
+}
 </style>
 {% endblock %}

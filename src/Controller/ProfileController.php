@@ -63,4 +63,30 @@ final class ProfileController extends AbstractController
             'user' => $user,
         ]);
     }
+
+        #[Route('/profile/delete', name: 'app_profile_delete', methods: ['POST'])]
+    public function deleteAccount(Request $request, EntityManagerInterface $em, TokenStorageInterface $tokenStorage): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            throw $this->createAccessDeniedException('No user logged in.');
+        }
+
+        if ($this->isCsrfTokenValid('delete_account', $request->request->get('_token'))) {
+            // Déconnecte l'utilisateur
+            $tokenStorage->setToken(null);
+
+            // Supprime le compte
+            $em->remove($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Your account has been deleted successfully.');
+            return $this->redirectToRoute('app_home');
+        }
+
+        $this->addFlash('error', 'Invalid CSRF token.');
+        return $this->redirectToRoute('app_profile');
+    }
+
 }
