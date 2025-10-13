@@ -5,7 +5,7 @@
 {% block body %}
 <div class="world-show-wrapper text-light py-5">
   <div class="container">
-    <h1 class="text-center mb-4 fw-bold">World</h1>
+    <h1 class="text-center mb-4 fw-bold">World : {{ world.name }}</h1>
 
     <div class="row justify-content-center g-4">
 
@@ -135,7 +135,18 @@
       </div>
     </div>
   </div>
+  <div class="mt-4">
+  {% include 'world/_world_nav.html.twig' %}
+  </div>
 </div>
+
+
+
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('world') }}
 
 <style>
 .btn-leave-world {
