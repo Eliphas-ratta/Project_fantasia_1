@@ -1,0 +1,136 @@
+// ===============================
+// 🌍 Project Fantasia — Entities Style
+// Shared styles for all world entities (Factions, Heroes, Races, etc.)
+// ===============================
+
+// --- COLORS ---
+$fantasia-green: #3ecf5a;
+$fantasia-dark: #111;
+$fantasia-card: #202020;
+$fantasia-text: #e5e5e5;
+
+// --- GLOBAL WRAPPER ---
+.world-index-wrapper {
+  min-height: 100vh;
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+
+  h1 {
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 10px rgba($fantasia-green, 0.5);
+  }
+}
+
+// --- GRID DISPLAY ---
+.entity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); // ✅ environ 8 cartes par ligne
+  gap: 1.2rem;
+  justify-items: center;
+  margin-top: 2rem;
+}
+
+.entity-card {
+  width: 150px; // ✅ largeur adaptée pour 8 cartes
+  background: linear-gradient(180deg, #111, #111);
+  border: 1px solid rgba($fantasia-green, 0.15);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: 0.25s ease;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+  color: $fantasia-text;
+  text-align: center;
+  font-size: 0.9rem;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba($fantasia-green, 0.5);
+    box-shadow: 0 0 12px rgba($fantasia-green, 0.3);
+  }
+
+  .entity-image img {
+    border-radius: 8px;
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    margin-bottom: 0.6rem;
+  }
+
+  h5 {
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.95rem;
+    margin: 0.5rem 0 0.3rem;
+  }
+
+  p {
+    font-size: 0.8rem;
+    color: #aaa;
+    line-height: 1.2;
+  }
+}
+
+
+// --- BUTTONS ---
+.btn-green {
+  display: inline-block;
+  background: $fantasia-green;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  transition: 0.25s ease;
+  text-decoration: none;
+
+  &:hover {
+    background: lighten($fantasia-green, 5%);
+    box-shadow: 0 0 15px rgba($fantasia-green, 0.4);
+  }
+}
+
+// --- FORMS ---
+.entity-form {
+  background-color: $fantasia-card;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid rgba($fantasia-green, 0.15);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  margin: 0 auto;
+
+  label {
+    font-weight: 600;
+    color: #ddd;
+  }
+
+  input,
+  textarea,
+  select {
+    background: #111;
+    color: #eee;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 0.6rem;
+    width: 100%;
+    margin-bottom: 1rem;
+
+    &:focus {
+      border-color: $fantasia-green;
+      box-shadow: 0 0 6px rgba($fantasia-green, 0.4);
+      outline: none;
+    }
+  }
+}
+
+@media (max-width: 992px) { // tablette
+  .entity-card {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) { // mobile
+  .entity-card {
+    width: 100%;
+  }
+}

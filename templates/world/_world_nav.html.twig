@@ -1,0 +1,26 @@
+{# templates/world/_world_nav.html.twig #}
+{% if currentWorld %}
+  <div class="world-entity-nav mb-4 shadow-sm">
+    <div class="container d-flex flex-wrap justify-content-center gap-3">
+      <a href="{{ path('app_faction_index', { id: currentWorld.id }) }}"
+        class="btn-nav-entity {% if app.request.attributes.get('_route') starts with 'app_faction' %}active{% endif %}">
+        Factions
+        </a>
+        <a href="#"
+        class="btn-nav-entity {% if app.request.attributes.get('_route') starts with 'app_hero' %}active{% endif %}">
+        Heroes
+        </a>
+      <a href="#" class="btn-nav-entity">Races</a>
+      <a href="#" class="btn-nav-entity">Guilds</a>
+      <a href="#" class="btn-nav-entity">Continents</a>
+      <a href="#" class="btn-nav-entity">Locations</a>
+      <a href="#" class="btn-nav-entity">Domains</a>
+      <a href="#" class="btn-nav-entity">Magic Spells</a>
+      <a href="#" class="btn-nav-entity">Religions</a>
+      <a href="#" class="btn-nav-entity">Creatures</a>
+      <a href="#" class="btn-nav-entity">Technology</a>
+      <a href="#" class="btn-nav-entity">Events</a>
+      <a href="#" class="btn-nav-entity">Items</a>
+    </div>
+  </div>
+{% endif %}

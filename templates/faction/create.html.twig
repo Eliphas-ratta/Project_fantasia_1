@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% block title %}Create Faction — {{ world.name }}{% endblock %}
+{% block stylesheets %}
+  {{ parent() }}
+  {{ encore_entry_link_tags('entities') }}
+{% endblock %}
+
+{% block body %}
+<div class="container text-light text-center py-5">
+  <h1 class="mb-4 fw-bold">Create a new Faction in {{ world.name }}</h1>
+
+  <div class="text-start mx-auto" style="max-width:600px;">
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+      {{ form_row(form.name) }}
+      {{ form_row(form.regime) }}
+      {{ form_row(form.description) }}
+      {{ form_row(form.image) }}
+      {{ form_row(form.continent) }}
+      {{ form_row(form.guilds) }}
+      {{ form_row(form.races) }}
+      {{ form_row(form.religions) }}
+      {{ form_row(form.technologies) }}
+      <button class="btn-green mt-3">Create Faction</button>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}

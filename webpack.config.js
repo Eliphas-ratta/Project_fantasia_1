@@ -27,6 +27,7 @@ Encore
     .addStyleEntry('world', './assets/styles/world.scss')
     .addEntry('world-actions', './assets/world-actions.js')
     .addStyleEntry('registercss', './assets/styles/register.scss')
+    .addStyleEntry('entities', './assets/styles/entities.scss')
 
 
 
